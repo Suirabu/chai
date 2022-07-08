@@ -4,16 +4,16 @@ use std::collections::HashMap;
 lazy_static! {
     pub static ref WORD_TOKEN_MAP: HashMap<&'static str, TokenKind> = {
         let mut map = HashMap::new();
-    
+
         // Built-in operations
         map.insert("+", TokenKind::Plus);
         map.insert("print", TokenKind::Print);
-        
+
         map
     };
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub enum TokenKind {
     // Built-in operations
     Plus,
@@ -23,7 +23,7 @@ pub enum TokenKind {
     Number(u64),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub kind: TokenKind,
     // Line and column

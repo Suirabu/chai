@@ -1,9 +1,12 @@
 pub mod error;
-pub mod token;
+pub mod expr;
 pub mod lexer;
+pub mod parser;
+pub mod token;
 
 use crate::error::ChaiError;
 use crate::lexer::Lexer;
+use crate::parser::Parser;
 use std::{env, process::ExitCode};
 
 fn main() -> ExitCode {
@@ -23,14 +26,20 @@ fn main() -> ExitCode {
         Err(e) => {
             eprintln!("{}", e);
             return ExitCode::FAILURE;
-        },
+        }
         Ok(l) => l,
     };
     let tokens = match lexer.collect_tokens() {
         None => return ExitCode::FAILURE,
         Some(t) => t,
     };
-    println!("Tokens: {:?}", tokens);
+
+    let mut parser = Parser::from_tokens(tokens);
+    let exprs = match parser.collect_exprs() {
+        None => return ExitCode::FAILURE,
+        Some(e) => e,
+    };
+    println!("{:?}", exprs);
 
     ExitCode::SUCCESS
 }
