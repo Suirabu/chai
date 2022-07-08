@@ -1,6 +1,6 @@
-use std::fs;
 use crate::error::ChaiError;
-use crate::token::{Token,TokenKind,WORD_TOKEN_MAP};
+use crate::token::{Token, TokenKind, WORD_TOKEN_MAP};
+use std::fs;
 
 #[derive(Debug)]
 pub struct Lexer {
@@ -15,10 +15,11 @@ impl Lexer {
     pub fn from_source_path(source_path: &String) -> Result<Self, ChaiError> {
         let source = match fs::read_to_string(source_path) {
             Err(_) => {
-                return Err(ChaiError::StandardError(
-                    format!("Failed to open file '{}' for reading", source_path)
-                ));
-            },
+                return Err(ChaiError::StandardError(format!(
+                    "Failed to open file '{}' for reading",
+                    source_path
+                )));
+            }
             Ok(s) => s,
         };
 
@@ -69,17 +70,14 @@ impl Lexer {
         let end = self.index;
         let lexemme = self.source.get(start..end).unwrap();
         match lexemme.parse::<u64>() {
-            Err(_) => {
-                Err(ChaiError::StandardError(
-                    format!("Failed to convert '{}' to number literal.", lexemme)
-                ))
-            },
-            Ok(v) => {
-                Ok(Token {
-                    kind: TokenKind::Number(v),
-                    position
-                })
-            },
+            Err(_) => Err(ChaiError::StandardError(format!(
+                "Failed to convert '{}' to number literal.",
+                lexemme
+            ))),
+            Ok(v) => Ok(Token {
+                kind: TokenKind::Number(v),
+                position,
+            }),
         }
     }
 
@@ -94,23 +92,20 @@ impl Lexer {
         let end = self.index;
         let lexemme = self.source.get(start..end).unwrap();
         match WORD_TOKEN_MAP.get(lexemme) {
-            None => {
-                Err(ChaiError::StandardError(
-                    format!("Unknown word '{}' found.", lexemme)
-                ))
-            },
-            Some(k) => {
-                Ok(Token {
-                    kind: k.clone(),
-                    position,
-                })
-            },
+            None => Err(ChaiError::StandardError(format!(
+                "Unknown word '{}' found.",
+                lexemme
+            ))),
+            Some(k) => Ok(Token {
+                kind: k.clone(),
+                position,
+            }),
         }
     }
 
     fn collect_token(&mut self) -> Result<Token, ChaiError> {
         let c = self.peek();
-        
+
         if c.is_ascii_digit() {
             self.collect_number()
         } else {
@@ -134,7 +129,7 @@ impl Lexer {
                 Err(e) => {
                     eprintln!("{}", e);
                     has_error = true;
-                },
+                }
             }
         }
 
