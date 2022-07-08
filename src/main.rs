@@ -1,10 +1,12 @@
 pub mod error;
 pub mod expr;
+pub mod interpreter;
 pub mod lexer;
 pub mod parser;
 pub mod token;
 
 use crate::error::ChaiError;
+use crate::interpreter::interpret_program;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use std::{env, process::ExitCode};
@@ -39,7 +41,14 @@ fn main() -> ExitCode {
         None => return ExitCode::FAILURE,
         Some(e) => e,
     };
-    println!("{:?}", exprs);
+
+    match interpret_program(exprs) {
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::FAILURE;
+        }
+        Ok(_) => {}
+    };
 
     ExitCode::SUCCESS
 }
