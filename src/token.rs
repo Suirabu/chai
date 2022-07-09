@@ -26,6 +26,7 @@ pub enum TokenKind {
 #[derive(Debug, Clone)]
 pub struct Token {
     pub kind: TokenKind,
+    pub source: String,
     // Line and column
     pub position: (usize, usize),
 }

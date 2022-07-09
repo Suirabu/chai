@@ -1,5 +1,5 @@
 use crate::error::ChaiError;
-use crate::expr::Expr;
+use crate::expr::{Expr,ExprKind};
 use crate::token::{Token, TokenKind};
 
 #[derive(Debug)]
@@ -28,10 +28,23 @@ impl Parser {
     }
 
     fn collect_expr(&mut self) -> Result<Expr, ChaiError> {
-        match self.advance().kind {
-            TokenKind::Number(v) => Ok(Expr::Push(v)),
-            TokenKind::Plus => Ok(Expr::Add),
-            TokenKind::Print => Ok(Expr::Print),
+        let token = self.advance();
+        match token.kind {
+            TokenKind::Number(v) => Ok(Expr {
+                source: token.source,
+                position: token.position,
+                kind: ExprKind::Push(v)
+            }),
+            TokenKind::Plus => Ok(Expr {
+                source: token.source,
+                position: token.position,
+                kind: ExprKind::Add
+            }),
+            TokenKind::Print => Ok(Expr {
+                source: token.source,
+                position: token.position,
+                kind: ExprKind::Print
+            }),
         }
     }
 

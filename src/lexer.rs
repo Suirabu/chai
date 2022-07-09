@@ -5,6 +5,7 @@ use std::fs;
 #[derive(Debug)]
 pub struct Lexer {
     source: String,
+    source_path: String,
     index: usize,
 
     // Line and column
@@ -25,6 +26,7 @@ impl Lexer {
 
         Ok(Self {
             source,
+            source_path: source_path.clone(),
             index: 0,
             position: (0, 0),
         })
@@ -70,12 +72,16 @@ impl Lexer {
         let end = self.index;
         let lexemme = self.source.get(start..end).unwrap();
         match lexemme.parse::<u64>() {
-            Err(_) => Err(ChaiError::StandardError(format!(
+            Err(_) => Err(ChaiError::SourceError(
+                self.source_path.clone(),
+                position,
+                format!(
                 "Failed to convert '{}' to number literal.",
                 lexemme
             ))),
             Ok(v) => Ok(Token {
                 kind: TokenKind::Number(v),
+                source: self.source_path.clone(),
                 position,
             }),
         }
@@ -92,12 +98,16 @@ impl Lexer {
         let end = self.index;
         let lexemme = self.source.get(start..end).unwrap();
         match WORD_TOKEN_MAP.get(lexemme) {
-            None => Err(ChaiError::StandardError(format!(
+            None => Err(ChaiError::SourceError(
+                self.source_path.clone(),
+                position,
+                format!(
                 "Unknown word '{}' found.",
                 lexemme
             ))),
             Some(k) => Ok(Token {
                 kind: k.clone(),
+                source: self.source_path.clone(),
                 position,
             }),
         }
