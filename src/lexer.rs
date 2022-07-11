@@ -14,6 +14,13 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn from_source_path(source_path: &String) -> Result<Self, ChaiError> {
+        if !source_path.ends_with(".chai") {
+            return Err(ChaiError::StandardError(format!(
+                "Source file '{}' must use the '.chai' file extension.",
+                source_path
+            )));
+        }
+
         let source = match fs::read_to_string(source_path) {
             Err(_) => {
                 return Err(ChaiError::StandardError(format!(
