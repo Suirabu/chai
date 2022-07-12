@@ -1,5 +1,5 @@
 use crate::error::ChaiError;
-use crate::expr::{Expr, ExprKind};
+use crate::expr::{Expr, ExprKind, Value};
 
 pub fn interpret_program(exprs: Vec<Expr>) -> Result<(), ChaiError> {
     let mut stack = Vec::new();
@@ -17,9 +17,29 @@ pub fn interpret_program(exprs: Vec<Expr>) -> Result<(), ChaiError> {
                     ));
                 }
 
-                let a = stack.pop().unwrap();
-                let b = stack.pop().unwrap();
-                stack.push(a + b);
+                let val = stack.pop().unwrap();
+                let a = match val {
+                    Value::Number(n) => n,
+                    _ => {
+                        return Err(ChaiError::SourceError(
+                            expr.source,
+                            expr.position,
+                            format!("Expected Value::Number(), found {:?} instead.", val),
+                        ));
+                    }
+                };
+                let val = stack.pop().unwrap();
+                let b = match val {
+                    Value::Number(n) => n,
+                    _ => {
+                        return Err(ChaiError::SourceError(
+                            expr.source,
+                            expr.position,
+                            format!("Expected Value::Number(), found {:?} instead.", val),
+                        ));
+                    }
+                };
+                stack.push(Value::Number(a + b));
             }
             ExprKind::Print => {
                 if stack.len() < 1 {

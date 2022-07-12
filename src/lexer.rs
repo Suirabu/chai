@@ -92,6 +92,34 @@ impl Lexer {
         }
     }
 
+    fn collect_string(&mut self) -> Result<Token, ChaiError> {
+        let start = self.index;
+        let position = self.position;
+
+        self.advance(); // Skip leading double-quote
+        while !self.reached_end() && self.peek() != '"' {
+            self.advance();
+        }
+
+        if self.reached_end() {
+            return Err(ChaiError::SourceError(
+                self.source_path.clone(),
+                position,
+                String::from("Expected closing double-quote. Found end-of-file instead."),
+            ));
+        }
+        self.advance(); // Skip trailing double-quote
+
+        let end = self.index;
+        let inner_string = self.source.get((start + 1)..(end - 1)).unwrap().to_owned();
+
+        Ok(Token {
+            kind: TokenKind::String(inner_string),
+            source: self.source_path.clone(),
+            position,
+        })
+    }
+
     fn collect_word(&mut self) -> Result<Token, ChaiError> {
         let start = self.index;
         let position = self.position;
@@ -121,6 +149,8 @@ impl Lexer {
 
         if c.is_ascii_digit() {
             self.collect_number()
+        } else if c == '"' {
+            self.collect_string()
         } else {
             self.collect_word()
         }

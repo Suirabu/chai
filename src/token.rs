@@ -21,6 +21,7 @@ pub enum TokenKind {
 
     // Literals
     Number(u64),
+    String(String),
 }
 
 #[derive(Debug, Clone)]

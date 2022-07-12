@@ -1,5 +1,5 @@
 use crate::error::ChaiError;
-use crate::expr::{Expr, ExprKind};
+use crate::expr::{Expr, ExprKind, Value};
 use crate::token::{Token, TokenKind};
 
 #[derive(Debug)]
@@ -33,7 +33,12 @@ impl Parser {
             TokenKind::Number(v) => Ok(Expr {
                 source: token.source,
                 position: token.position,
-                kind: ExprKind::Push(v),
+                kind: ExprKind::Push(Value::Number(v)),
+            }),
+            TokenKind::String(s) => Ok(Expr {
+                source: token.source,
+                position: token.position,
+                kind: ExprKind::Push(Value::String(s)),
             }),
             TokenKind::Plus => Ok(Expr {
                 source: token.source,
