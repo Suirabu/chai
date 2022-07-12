@@ -12,15 +12,13 @@ impl fmt::Display for ChaiError {
         match self {
             ChaiError::StandardError(s) => {
                 f.write_fmt(format_args!("{} {}", "Error:".red().bold(), s))
-            },
-            ChaiError::SourceError(source, position, s) => {
-                f.write_fmt(format_args!(
-                    "{} {} {}",
-                    "Error:".red().bold(),
-                    format!("{} ({},{}):", source, position.0 + 1, position.1 + 1).bold(),
-                    s
-                ))
-            },
+            }
+            ChaiError::SourceError(source, position, s) => f.write_fmt(format_args!(
+                "{} {} {}",
+                "Error:".red().bold(),
+                format!("{} ({},{}):", source, position.0 + 1, position.1 + 1).bold(),
+                s
+            )),
         }
     }
 }

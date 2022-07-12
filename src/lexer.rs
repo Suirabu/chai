@@ -82,10 +82,8 @@ impl Lexer {
             Err(_) => Err(ChaiError::SourceError(
                 self.source_path.clone(),
                 position,
-                format!(
-                "Failed to convert '{}' to number literal.",
-                lexemme
-            ))),
+                format!("Failed to convert '{}' to number literal.", lexemme),
+            )),
             Ok(v) => Ok(Token {
                 kind: TokenKind::Number(v),
                 source: self.source_path.clone(),
@@ -108,10 +106,8 @@ impl Lexer {
             None => Err(ChaiError::SourceError(
                 self.source_path.clone(),
                 position,
-                format!(
-                "Unknown word '{}' found.",
-                lexemme
-            ))),
+                format!("Unknown word '{}' found.", lexemme),
+            )),
             Some(k) => Ok(Token {
                 kind: k.clone(),
                 source: self.source_path.clone(),

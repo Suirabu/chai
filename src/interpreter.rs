@@ -1,5 +1,5 @@
 use crate::error::ChaiError;
-use crate::expr::{Expr,ExprKind};
+use crate::expr::{Expr, ExprKind};
 
 pub fn interpret_program(exprs: Vec<Expr>) -> Result<(), ChaiError> {
     let mut stack = Vec::new();
