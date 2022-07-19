@@ -1,4 +1,6 @@
-# Chai -- A comfy programming language
+# Chai
+
+A comfy programming language.
 
 ## About
 
@@ -8,17 +10,21 @@ programming language designed with comfort and joy-of-use in mind.
 Admittedly what makes a language "comfortable" and "fun to use" is extremely subjective,
 so it should be noted that this language was primarily designed with *my* comfort and joy-of-use in mind.
 
-## Overview
+## Quick start
 
-See the language overview [here](chai-overview.md).
-
-## Usage
-
-Run a Chai script
+Install Chai
 
 ```
-$ cargo run <file path>
+$ cargo install --path ./
 ```
+
+Compile a Chai program
+
+```
+$ chai <program path>
+```
+
+Read the [official language overview](chai-overview.md).
 
 ## License
 
