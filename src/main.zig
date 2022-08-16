@@ -16,7 +16,7 @@ pub fn main() !void {
 
     // Lex debug program
     const program =
-        \\ 5 10
+        \\ 3.14 10
     ;
     const program_path = "test.chai"; // Fake name for debugging purposes
 

@@ -5,17 +5,20 @@ pub const TokenKindTag = enum {
     const Self = @This();
 
     IntegerLiteral,
+    FloatLiteral,
 };
 
 pub const TokenKind = union(TokenKindTag) {
     const Self = @This();
 
     IntegerLiteral: isize,
+    FloatLiteral: f64,
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
         return switch (tag) {
             .IntegerLiteral => "integer literal",
+            .FloatLiteral => "float literal",
         };
     }
 };

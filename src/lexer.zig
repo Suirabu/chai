@@ -31,13 +31,13 @@ pub const Lexer = struct {
         };
     }
 
-    fn reachedEnd(self: *Self) bool {
+    fn reachedEnd(self: Self) bool {
         return self.cursor >= self.source.len;
     }
 
     /// Returns a character from `source` at the curent position of the cursor.
     /// Assumes that `cursor` is not greater than `source.len`.
-    fn peek(self: *Self) u8 {
+    fn peek(self: Self) u8 {
         return self.source[self.cursor];
     }
 
@@ -58,6 +58,14 @@ pub const Lexer = struct {
         return c;
     }
 
+    fn atWordBoundary(self: Self) bool {
+        if (ascii.isSpace(self.peek()) or self.peek() == '.') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     fn skipWhitespace(self: *Self) void {
         while (!self.reachedEnd() and ascii.isSpace(self.peek())) {
             _ = self.advance();
@@ -67,7 +75,7 @@ pub const Lexer = struct {
     fn collectWord(self: *Self) []const u8 {
         const start = self.cursor;
 
-        while (!self.reachedEnd() and !ascii.isSpace(self.peek())) {
+        while (!self.reachedEnd() and !self.atWordBoundary()) {
             _ = self.advance();
         }
 
@@ -75,15 +83,37 @@ pub const Lexer = struct {
         return self.source[start..end];
     }
 
-    fn collectIntegerLiteral(self: *Self) !Token {
+    fn collectNumberLiteral(self: *Self) !Token {
         const src_loc = self.src_loc;
-        const lexemme = self.collectWord();
-        const int_result = std.fmt.parseInt(isize, lexemme, 0) catch |err| {
-            std.log.err("{}: Failed to parse '{s}' as an integer literal", .{ src_loc, lexemme });
-            return err;
-        };
+        const start = self.cursor; // Used for collecting float literals
+        var lexemme = self.collectWord();
 
-        return Token{ .kind = TokenKind{ .IntegerLiteral = int_result }, .src_loc = src_loc };
+        if (!self.reachedEnd() and self.peek() == '.') {
+            // Collect float literal
+            _ = self.advance(); // Skip period
+
+            if (self.reachedEnd()) {
+                std.log.err("{}: Float literal cannot end with a trailing period. Try adding a '0' to the end instead?", .{src_loc});
+                return error.LexerError;
+            }
+            _ = self.collectWord(); // Skip decimal
+
+            const end = self.cursor;
+            lexemme = self.source[start..end];
+
+            const float_result = std.fmt.parseFloat(f64, lexemme) catch |err| {
+                std.log.err("{}: Failed to parse '{s}' as a float literal", .{ src_loc, lexemme });
+                return err;
+            };
+            return Token{ .kind = TokenKind{ .FloatLiteral = float_result }, .src_loc = src_loc };
+        } else {
+            // Collect integer literal
+            const int_result = std.fmt.parseInt(isize, lexemme, 0) catch |err| {
+                std.log.err("{}: Failed to parse '{s}' as an integer literal", .{ src_loc, lexemme });
+                return err;
+            };
+            return Token{ .kind = TokenKind{ .IntegerLiteral = int_result }, .src_loc = src_loc };
+        }
     }
 
     fn collectToken(self: *Self) !Token {
@@ -91,7 +121,7 @@ pub const Lexer = struct {
         const c = self.peek();
 
         if (ascii.isDigit(c)) {
-            return self.collectIntegerLiteral();
+            return self.collectNumberLiteral();
         }
 
         std.log.err("{}: Lexing non-integer literals is not yet supported", .{src_loc});
