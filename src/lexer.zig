@@ -116,12 +116,38 @@ pub const Lexer = struct {
         }
     }
 
+    fn collectStringLiteral(self: *Self) !Token {
+        const src_loc = self.src_loc;
+
+        _ = self.advance(); // Skip leading double-quote
+
+        const start = self.cursor;
+
+        while (!self.reachedEnd() and self.peek() != '"') {
+            _ = self.advance();
+        }
+
+        const end = self.cursor;
+
+        if (self.reachedEnd()) {
+            std.log.err("{}: Expected closing double-quote, found end of file instead", .{src_loc});
+            return error.LexerError;
+        }
+
+        _ = self.advance(); // Skip trailing double-quote
+
+        const lexemme = self.source[start..end];
+        return Token{ .kind = TokenKind{ .StringLiteral = lexemme }, .src_loc = src_loc };
+    }
+
     fn collectToken(self: *Self) !Token {
         const src_loc = self.src_loc;
         const c = self.peek();
 
         if (ascii.isDigit(c)) {
             return self.collectNumberLiteral();
+        } else if (self.peek() == '"') {
+            return self.collectStringLiteral();
         }
 
         std.log.err("{}: Lexing non-integer literals is not yet supported", .{src_loc});

@@ -6,6 +6,7 @@ pub const TokenKindTag = enum {
 
     IntegerLiteral,
     FloatLiteral,
+    StringLiteral,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -13,6 +14,7 @@ pub const TokenKind = union(TokenKindTag) {
 
     IntegerLiteral: isize,
     FloatLiteral: f64,
+    StringLiteral: []const u8,
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
@@ -20,6 +22,7 @@ pub const TokenKind = union(TokenKindTag) {
         return switch (tag) {
             .IntegerLiteral => "integer literal",
             .FloatLiteral => "float literal",
+            .StringLiteral => "string literal",
         };
     }
 };
@@ -37,6 +40,7 @@ pub const Token = struct {
         switch (self.kind) {
             .IntegerLiteral => |value| try fmt.format(writer, "Token: {}: {s} ({d})", .{ self.src_loc, self.kind.getHumanName(), value }),
             .FloatLiteral => |value| try fmt.format(writer, "Token: {}: {s} ({e})", .{ self.src_loc, self.kind.getHumanName(), value }),
+            .StringLiteral => |value| try fmt.format(writer, "Token: {}: {s} (\"{s}\")", .{ self.src_loc, self.kind.getHumanName(), value }),
         }
     }
 };
