@@ -140,6 +140,34 @@ pub const Lexer = struct {
         return Token{ .kind = TokenKind{ .StringLiteral = lexemme }, .src_loc = src_loc };
     }
 
+    fn collectCharacterLiteral(self: *Self) !Token {
+        const src_loc = self.src_loc;
+        _ = self.advance();
+
+        if (self.reachedEnd()) {
+            std.log.err("{}: Expected complete character literal, found end of file instead", .{self.src_loc});
+            return error.LexerError;
+        }
+
+        const c = self.advance();
+        if (c == '\'') {
+            std.log.err("{}: Expected complete character literal", .{self.src_loc});
+            return error.LexerError;
+        }
+
+        if (self.reachedEnd()) {
+            std.log.err("{}: Expected closing single-quote, found end of file instead", .{self.src_loc});
+            return error.LexerError;
+        }
+        const closing = self.advance();
+        if (closing != '\'') {
+            std.log.err("{}: Expected closing single-quote, found '{c}' instead", .{ self.src_loc, closing });
+            return error.LexerError;
+        }
+
+        return Token{ .kind = TokenKind{ .CharacterLiteral = c }, .src_loc = src_loc };
+    }
+
     fn collectToken(self: *Self) !Token {
         const src_loc = self.src_loc;
         const c = self.peek();
@@ -148,6 +176,8 @@ pub const Lexer = struct {
             return self.collectNumberLiteral();
         } else if (self.peek() == '"') {
             return self.collectStringLiteral();
+        } else if (self.peek() == '\'') {
+            return self.collectCharacterLiteral();
         }
 
         std.log.err("{}: Lexing non-integer literals is not yet supported", .{src_loc});
