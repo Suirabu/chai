@@ -16,6 +16,7 @@ pub const TokenKind = union(TokenKindTag) {
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
+
         return switch (tag) {
             .IntegerLiteral => "integer literal",
             .FloatLiteral => "float literal",
@@ -32,7 +33,11 @@ pub const Token = struct {
     pub fn format(self: Self, comptime layout: []const u8, opts: fmt.FormatOptions, writer: anytype) !void {
         _ = layout;
         _ = opts;
-        try fmt.format(writer, "Token: {}: {s}", .{ self.src_loc, self.kind.getHumanName() });
+
+        switch (self.kind) {
+            .IntegerLiteral => |value| try fmt.format(writer, "Token: {}: {s} ({d})", .{ self.src_loc, self.kind.getHumanName(), value }),
+            .FloatLiteral => |value| try fmt.format(writer, "Token: {}: {s} ({e})", .{ self.src_loc, self.kind.getHumanName(), value }),
+        }
     }
 };
 
