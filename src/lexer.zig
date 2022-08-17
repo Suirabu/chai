@@ -130,7 +130,7 @@ pub const Lexer = struct {
         const end = self.cursor;
 
         if (self.reachedEnd()) {
-            std.log.err("{}: Expected closing double-quote, found end of file instead", .{src_loc});
+            std.log.err("{}: Expected closing double-quote, found end of file instead", .{self.src_loc});
             return error.LexerError;
         }
 
