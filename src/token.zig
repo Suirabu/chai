@@ -23,6 +23,7 @@ pub const TokenKindTag = enum {
     Over,
     Swap,
     Rot,
+    Print,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -47,6 +48,7 @@ pub const TokenKind = union(TokenKindTag) {
     Over,
     Swap,
     Rot,
+    Print,
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
@@ -71,6 +73,8 @@ pub const TokenKind = union(TokenKindTag) {
             .Over => "over",
             .Swap => "swap",
             .Rot => "rot",
+
+            .Print => "print",
         };
     }
 };

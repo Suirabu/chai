@@ -56,6 +56,8 @@ pub const Lexer = struct {
         try map.put("swap", .Swap);
         try map.put("rot", .Rot);
 
+        try map.put("print", .Print);
+
         return map;
     }
 
