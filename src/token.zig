@@ -17,6 +17,12 @@ pub const TokenKindTag = enum {
     Star,
     Slash,
     Perc,
+
+    Drop,
+    Dup,
+    Over,
+    Swap,
+    Rot,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -36,6 +42,12 @@ pub const TokenKind = union(TokenKindTag) {
     Slash,
     Perc,
 
+    Drop,
+    Dup,
+    Over,
+    Swap,
+    Rot,
+
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
 
@@ -53,6 +65,12 @@ pub const TokenKind = union(TokenKindTag) {
             .Star => "multiply",
             .Slash => "divide",
             .Perc => "mod",
+
+            .Drop => "drop",
+            .Dup => "dup",
+            .Over => "over",
+            .Swap => "swap",
+            .Rot => "rot",
         };
     }
 };

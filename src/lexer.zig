@@ -50,6 +50,12 @@ pub const Lexer = struct {
         try map.put("/", .Slash);
         try map.put("%", .Perc);
 
+        try map.put("drop", .Drop);
+        try map.put("dup", .Dup);
+        try map.put("over", .Over);
+        try map.put("swap", .Swap);
+        try map.put("rot", .Rot);
+
         return map;
     }
 
