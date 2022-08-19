@@ -12,11 +12,13 @@ const SrcLoc = token.SrcLoc;
 pub const Lexer = struct {
     const Self = @This();
     const TokenArrayList = std.ArrayList(Token);
+    const KeywordsHashMap = std.StringHashMap(TokenKind);
 
     source: []const u8,
     cursor: usize,
     src_loc: SrcLoc,
     allocator: Allocator,
+    keywords: KeywordsHashMap,
 
     pub fn initFromSource(source: []const u8, source_path: []const u8, allocator: Allocator) Self {
         return Self{
@@ -28,7 +30,21 @@ pub const Lexer = struct {
                 .path = source_path,
             },
             .allocator = allocator,
+            // The `catch unreachable` here is a pretty nasty hack which assumes that allocation
+            // will never fail. Idealy this hash map should be constructed at compile time without
+            // an allocator for maximum efficiency and to avoid the risk of allocation failure.
+            // TODO: Generate hashmap at compile time
+            .keywords = getKeywordsHashMap(allocator) catch unreachable,
         };
+    }
+
+    fn getKeywordsHashMap(allocator: Allocator) !KeywordsHashMap {
+        var map = KeywordsHashMap.init(allocator);
+
+        try map.put("true", TokenKind{ .BooleanLiteral = true });
+        try map.put("false", TokenKind{ .BooleanLiteral = false });
+
+        return map;
     }
 
     fn reachedEnd(self: Self) bool {
@@ -181,8 +197,18 @@ pub const Lexer = struct {
         return Token{ .kind = TokenKind{ .CharacterLiteral = c }, .src_loc = src_loc };
     }
 
-    fn collectToken(self: *Self) !Token {
+    fn collectKeyword(self: *Self) !Token {
         const src_loc = self.src_loc;
+        const lexemme = self.collectWord();
+        if (self.keywords.contains(lexemme)) {
+            return Token{ .kind = self.keywords.get(lexemme).?, .src_loc = src_loc };
+        }
+
+        std.log.err("{}: Invalid keyword \"{s}\" found", .{ src_loc, lexemme });
+        return error.InvalidKeyword;
+    }
+
+    fn collectToken(self: *Self) !Token {
         const c = self.peek();
 
         if (ascii.isDigit(c)) {
@@ -191,10 +217,9 @@ pub const Lexer = struct {
             return self.collectStringLiteral();
         } else if (self.peek() == '\'') {
             return self.collectCharacterLiteral();
+        } else {
+            return self.collectKeyword();
         }
-
-        std.log.err("{}: Lexing non-integer literals is not yet supported", .{src_loc});
-        unreachable;
     }
 
     pub fn collectTokens(self: *Self) ![]Token {
