@@ -111,6 +111,19 @@ pub const Lexer = struct {
         }
     }
 
+    fn isValidIdentifier(maybe_identifier: []const u8) bool {
+        if (!ascii.isAlpha(maybe_identifier[0])) {
+            return false;
+        }
+        for (maybe_identifier) |c| {
+            if (!ascii.isAlNum(c) and c != '-') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     fn skipWhitespace(self: *Self) void {
         while (!self.reachedEnd() and ascii.isSpace(self.peek())) {
             _ = self.advance();
@@ -197,15 +210,19 @@ pub const Lexer = struct {
         return Token{ .kind = TokenKind{ .CharacterLiteral = c }, .src_loc = src_loc };
     }
 
-    fn collectKeyword(self: *Self) !Token {
+    fn collectKeywordOrIdentifier(self: *Self) !Token {
         const src_loc = self.src_loc;
         const lexemme = self.collectWord();
         if (self.keywords.contains(lexemme)) {
             return Token{ .kind = self.keywords.get(lexemme).?, .src_loc = src_loc };
         }
 
-        std.log.err("{}: Invalid keyword \"{s}\" found", .{ src_loc, lexemme });
-        return error.InvalidKeyword;
+        if (isValidIdentifier(lexemme)) {
+            return Token{ .kind = TokenKind{ .Identifier = lexemme }, .src_loc = src_loc };
+        } else {
+            std.log.err("{}: Invalid identifier '{s}'", .{ src_loc, lexemme });
+            return error.InvalidIdentifier;
+        }
     }
 
     fn collectToken(self: *Self) !Token {
@@ -218,7 +235,7 @@ pub const Lexer = struct {
         } else if (self.peek() == '\'') {
             return self.collectCharacterLiteral();
         } else {
-            return self.collectKeyword();
+            return self.collectKeywordOrIdentifier();
         }
     }
 
