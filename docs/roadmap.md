@@ -10,9 +10,7 @@ such as
 - Stack, arithmetic, bitwise, and boolean logic operators
 - Procedures, conditional operations, and loops
 - Basic type-checking
-    Type safety should be guarenteed, with the exception of pointers which
-    should remain untyped until `v0.3`
-
+    Type safety should be guarenteed, with the exception of pointers
 - Global variables and constants
 - Static memory allocation
 
