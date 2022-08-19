@@ -44,6 +44,12 @@ pub const Lexer = struct {
         try map.put("true", TokenKind{ .BooleanLiteral = true });
         try map.put("false", TokenKind{ .BooleanLiteral = false });
 
+        try map.put("+", .Plus);
+        try map.put("-", .Minus);
+        try map.put("*", .Star);
+        try map.put("/", .Slash);
+        try map.put("%", .Perc);
+
         return map;
     }
 

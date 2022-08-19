@@ -11,6 +11,12 @@ pub const TokenKindTag = enum {
     BooleanLiteral,
 
     Identifier,
+
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Perc,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -24,6 +30,12 @@ pub const TokenKind = union(TokenKindTag) {
 
     Identifier: []const u8,
 
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Perc,
+
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
 
@@ -33,7 +45,14 @@ pub const TokenKind = union(TokenKindTag) {
             .StringLiteral => "string literal",
             .CharacterLiteral => "character literal",
             .BooleanLiteral => "boolean literal",
+
             .Identifier => "identifier",
+
+            .Plus => "plus",
+            .Minus => "minus",
+            .Star => "multiply",
+            .Slash => "divide",
+            .Perc => "mod",
         };
     }
 };
@@ -62,6 +81,8 @@ pub const Token = struct {
             .CharacterLiteral => |value| try fmt.format(writer, "Token: {}: {s} ('{c}')", .{ self.src_loc, self.kind.getHumanName(), value }),
             .BooleanLiteral => |value| try fmt.format(writer, "Token: {}: {s} ({s})", .{ self.src_loc, self.kind.getHumanName(), getBooleanAsString(value) }),
             .Identifier => |value| try fmt.format(writer, "Token: {}: {s} ({s})", .{ self.src_loc, self.kind.getHumanName(), value }),
+
+            else => try fmt.format(writer, "Token: {}: {s}", .{ self.src_loc, self.kind.getHumanName() }),
         }
     }
 };
