@@ -58,6 +58,35 @@ pub const Lexer = struct {
         return c;
     }
 
+    fn expect(self: *Self, expected: u8, expected_description: []const u8) !void {
+        const src_loc = self.src_loc;
+
+        if (self.reachedEnd()) {
+            std.log.err("{}: Expected {s}, found end of file instead", .{ src_loc, expected_description });
+            return error.ExpectedCharNotFound;
+        }
+
+        const found = self.peek();
+        if (found != expected) {
+            if (ascii.isGraph(found)) {
+                std.log.err("{}: Expected {s}, found '{c}' instead", .{ src_loc, expected_description, found });
+            } else {
+                const found_description = switch (found) {
+                    '\n' => "newline",
+                    '\r' => "carriage return",
+                    '\t' => "horizontal tab",
+                    ' ' => "space",
+                    // TODO: Replace with hex representation of character
+                    else => "unexpected character",
+                };
+                std.log.err("{}: Expected {s}, found {s} instead", .{ src_loc, expected_description, found_description });
+            }
+            return error.ExpectedCharNotFound;
+        }
+
+        _ = self.advance();
+    }
+
     fn atWordBoundary(self: Self) bool {
         if (ascii.isSpace(self.peek()) or self.peek() == '.') {
             return true;
@@ -118,9 +147,7 @@ pub const Lexer = struct {
 
     fn collectStringLiteral(self: *Self) !Token {
         const src_loc = self.src_loc;
-
-        _ = self.advance(); // Skip leading double-quote
-
+        try self.expect('"', "opening double-quote");
         const start = self.cursor;
 
         while (!self.reachedEnd() and self.peek() != '"') {
@@ -128,13 +155,7 @@ pub const Lexer = struct {
         }
 
         const end = self.cursor;
-
-        if (self.reachedEnd()) {
-            std.log.err("{}: Expected closing double-quote, found end of file instead", .{self.src_loc});
-            return error.LexerError;
-        }
-
-        _ = self.advance(); // Skip trailing double-quote
+        try self.expect('"', "closing double-quote");
 
         const lexemme = self.source[start..end];
         return Token{ .kind = TokenKind{ .StringLiteral = lexemme }, .src_loc = src_loc };
@@ -142,7 +163,7 @@ pub const Lexer = struct {
 
     fn collectCharacterLiteral(self: *Self) !Token {
         const src_loc = self.src_loc;
-        _ = self.advance();
+        try self.expect('\'', "opening single-quote");
 
         if (self.reachedEnd()) {
             std.log.err("{}: Expected complete character literal, found end of file instead", .{self.src_loc});
@@ -155,15 +176,7 @@ pub const Lexer = struct {
             return error.LexerError;
         }
 
-        if (self.reachedEnd()) {
-            std.log.err("{}: Expected closing single-quote, found end of file instead", .{self.src_loc});
-            return error.LexerError;
-        }
-        const closing = self.advance();
-        if (closing != '\'') {
-            std.log.err("{}: Expected closing single-quote, found '{c}' instead", .{ self.src_loc, closing });
-            return error.LexerError;
-        }
+        try self.expect('\'', "closing single-quote");
 
         return Token{ .kind = TokenKind{ .CharacterLiteral = c }, .src_loc = src_loc };
     }
