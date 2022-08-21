@@ -2,6 +2,7 @@ const std = @import("std");
 const fs = std.fs;
 
 const Lexer = @import("lexer.zig").Lexer;
+const Parser = @import("parser.zig").Parser;
 
 const log_level: std.log.Level = .debug;
 
@@ -38,8 +39,11 @@ pub fn main() !void {
     var lexer = Lexer.initFromSource(source, source_path, arena.allocator());
     const tokens = try lexer.collectTokens();
 
-    // Debug: Display lexer results
-    for (tokens) |tok| {
-        std.debug.print("{}\n", .{tok});
+    var parser = Parser.init(arena.allocator(), tokens);
+    const exprs = try parser.collectExprs();
+
+    // Debug: Display parser results
+    for (exprs) |expr| {
+        std.debug.print("{}\n", .{expr});
     }
 }
