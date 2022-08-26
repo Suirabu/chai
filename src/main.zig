@@ -43,12 +43,6 @@ pub fn main() !void {
     var parser = Parser.init(arena.allocator(), tokens);
     const exprs = try parser.collectExprs();
 
-    // Debug: Display parser results
-    for (exprs) |expr| {
-        std.debug.print("{}\n", .{expr});
-    }
-
-    std.debug.print("Begin type checking...\n", .{});
     var type_checker = TypeChecker.init(exprs, arena.allocator());
     try type_checker.check();
 }
