@@ -4,6 +4,7 @@ const fs = std.fs;
 const Lexer = @import("lexer.zig").Lexer;
 const Parser = @import("parser.zig").Parser;
 const TypeChecker = @import("typecheck.zig").TypeChecker;
+const CodeGenerator = @import("codegen.zig").CodeGenerator;
 
 const log_level: std.log.Level = .debug;
 
@@ -45,4 +46,8 @@ pub fn main() !void {
 
     var type_checker = TypeChecker.init(exprs, arena.allocator());
     try type_checker.check();
+
+    var stdout = std.io.getStdOut();
+    var code_generator = CodeGenerator.init(exprs, stdout);
+    try code_generator.generate_x86_64_intel_linux();
 }
