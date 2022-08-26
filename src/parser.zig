@@ -67,6 +67,31 @@ pub const Parser = struct {
         return Expr{ .kind = .Mod, .src_loc = tok.src_loc };
     }
 
+    fn collectDrop(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Drop, .src_loc = tok.src_loc };
+    }
+
+    fn collectDup(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Dup, .src_loc = tok.src_loc };
+    }
+
+    fn collectOver(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Over, .src_loc = tok.src_loc };
+    }
+
+    fn collectSwap(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Swap, .src_loc = tok.src_loc };
+    }
+
+    fn collectRot(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Rot, .src_loc = tok.src_loc };
+    }
+
     fn collectExpr(self: *Self) !Expr {
         return switch (self.peek().kind) {
             .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral => return self.collectPush(),
@@ -75,6 +100,12 @@ pub const Parser = struct {
             .Star => self.collectMultiply(),
             .Slash => self.collectDivide(),
             .Perc => self.collectMod(),
+
+            .Drop => self.collectDrop(),
+            .Dup => self.collectDup(),
+            .Over => self.collectOver(),
+            .Swap => self.collectSwap(),
+            .Rot => self.collectRot(),
 
             else => {
                 std.log.err("{}: Cannot parse expression from token '{s}'", .{ self.peek().src_loc, self.peek().kind.getHumanName() });

@@ -144,6 +144,55 @@ pub const TypeChecker = struct {
                     }
                     try self.type_stack.append(t1);
                 },
+                .Drop => {
+                    if (self.type_stack.items.len < 1) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    _ = self.type_stack.pop();
+                },
+                .Dup => {
+                    if (self.type_stack.items.len < 1) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    const t = self.type_stack.pop();
+                    try self.type_stack.append(t);
+                    try self.type_stack.append(t);
+                },
+                .Over => {
+                    if (self.type_stack.items.len < 2) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    const t2 = self.type_stack.pop();
+                    const t1 = self.type_stack.pop();
+                    try self.type_stack.append(t1);
+                    try self.type_stack.append(t2);
+                    try self.type_stack.append(t1);
+                },
+                .Swap => {
+                    if (self.type_stack.items.len < 1) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    const t2 = self.type_stack.pop();
+                    const t1 = self.type_stack.pop();
+                    try self.type_stack.append(t2);
+                    try self.type_stack.append(t1);
+                },
+                .Rot => {
+                    if (self.type_stack.items.len < 1) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    const t3 = self.type_stack.pop();
+                    const t2 = self.type_stack.pop();
+                    const t1 = self.type_stack.pop();
+                    try self.type_stack.append(t2);
+                    try self.type_stack.append(t3);
+                    try self.type_stack.append(t1);
+                },
             }
         }
     }

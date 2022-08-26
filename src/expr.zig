@@ -77,6 +77,12 @@ pub const ExprKindTag = enum {
     Multiply,
     Divide,
     Mod,
+
+    Drop,
+    Dup,
+    Over,
+    Swap,
+    Rot,
 };
 
 pub const ExprKind = union(ExprKindTag) {
@@ -90,6 +96,12 @@ pub const ExprKind = union(ExprKindTag) {
     Divide,
     Mod,
 
+    Drop,
+    Dup,
+    Over,
+    Swap,
+    Rot,
+
     pub fn getHumanName(self: Self) []const u8 {
         return switch (self) {
             .Push => "push",
@@ -99,6 +111,12 @@ pub const ExprKind = union(ExprKindTag) {
             .Multiply => "multiply",
             .Divide => "divide",
             .Mod => "mod",
+
+            .Drop => "drop",
+            .Dup => "dup",
+            .Over => "over",
+            .Swap => "swap",
+            .Rot => "rot",
         };
     }
 
