@@ -6,12 +6,25 @@ const TokenKind = token.TokenKind;
 const SrcLoc = token.SrcLoc;
 
 pub const ValueTag = enum {
+    const Self = @This();
+
     Bool,
     Character,
     Integer,
     Float,
     String,
     Ptr,
+
+    pub fn getHumanName(self: Self) []const u8 {
+        return switch (self) {
+            .Bool => "bool",
+            .Character => "character",
+            .Integer => "integer",
+            .Float => "float",
+            .String => "string",
+            .Ptr => "pointer",
+        };
+    }
 };
 
 pub const Value = union(ValueTag) {
