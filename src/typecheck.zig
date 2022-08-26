@@ -195,5 +195,10 @@ pub const TypeChecker = struct {
                 },
             }
         }
+
+        if (self.type_stack.items.len != 0) {
+            std.log.err("Expected 0 elements left remaining on stack before exiting, found {d}", .{self.type_stack.items.len});
+            return error.RemainingElements;
+        }
     }
 };
