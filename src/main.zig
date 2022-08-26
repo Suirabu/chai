@@ -3,7 +3,7 @@ const fs = std.fs;
 
 const Lexer = @import("lexer.zig").Lexer;
 const Parser = @import("parser.zig").Parser;
-const type_check_exprs = @import("TypeCheck.zig").type_check_exprs;
+const TypeChecker = @import("typecheck.zig").TypeChecker;
 
 const log_level: std.log.Level = .debug;
 
@@ -49,5 +49,6 @@ pub fn main() !void {
     }
 
     std.debug.print("Begin type checking...\n", .{});
-    try type_check_exprs(exprs, arena.allocator());
+    var type_checker = TypeChecker.init(exprs, arena.allocator());
+    try type_checker.check();
 }
