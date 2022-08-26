@@ -45,9 +45,36 @@ pub const Parser = struct {
         return Expr{ .kind = ExprKind{ .Push = try Value.fromTokenKind(tok.kind) }, .src_loc = tok.src_loc };
     }
 
+    fn collectPlus(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Plus, .src_loc = tok.src_loc };
+    }
+
+    fn collectMinus(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Minus, .src_loc = tok.src_loc };
+    }
+    fn collectMultiply(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Multiply, .src_loc = tok.src_loc };
+    }
+    fn collectDivide(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Divide, .src_loc = tok.src_loc };
+    }
+    fn collectMod(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Mod, .src_loc = tok.src_loc };
+    }
+
     fn collectExpr(self: *Self) !Expr {
         return switch (self.peek().kind) {
             .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral => return self.collectPush(),
+            .Plus => self.collectPlus(),
+            .Minus => self.collectMinus(),
+            .Star => self.collectMultiply(),
+            .Slash => self.collectDivide(),
+            .Perc => self.collectMod(),
 
             else => {
                 std.log.err("{}: Cannot parse expression from token '{s}'", .{ self.peek().src_loc, self.peek().kind.getHumanName() });

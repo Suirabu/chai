@@ -62,6 +62,12 @@ pub const Value = union(ValueTag) {
 
 pub const ExprKindTag = enum {
     Push,
+
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Mod,
 };
 
 pub const ExprKind = union(ExprKindTag) {
@@ -69,12 +75,31 @@ pub const ExprKind = union(ExprKindTag) {
 
     Push: Value,
 
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Mod,
+
+    pub fn getHumanName(self: Self) []const u8 {
+        return switch (self) {
+            .Push => "push",
+
+            .Plus => "plus",
+            .Minus => "minus",
+            .Multiply => "multiply",
+            .Divide => "divide",
+            .Mod => "mod",
+        };
+    }
+
     pub fn format(self: Self, comptime layout: []const u8, opts: fmt.FormatOptions, writer: anytype) !void {
         _ = layout;
         _ = opts;
 
         switch (self) {
-            .Push => |value| try fmt.format(writer, "push ({})", .{value}),
+            .Push => |value| try fmt.format(writer, "{s} ({})", .{ self.getHumanName(), value }),
+            else => try fmt.format(writer, "{s}", .{self.getHumanName()}),
         }
     }
 };
