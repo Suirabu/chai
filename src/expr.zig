@@ -9,7 +9,6 @@ pub const ValueTag = enum {
     const Self = @This();
 
     Bool,
-    Character,
     Integer,
     Float,
     String,
@@ -18,7 +17,6 @@ pub const ValueTag = enum {
     pub fn getHumanName(self: Self) []const u8 {
         return switch (self) {
             .Bool => "bool",
-            .Character => "character",
             .Integer => "integer",
             .Float => "float",
             .String => "string",
@@ -31,7 +29,6 @@ pub const Value = union(ValueTag) {
     const Self = @This();
 
     Bool: bool,
-    Character: u8,
     Integer: i64,
     Float: f64,
     String: []const u8,
@@ -40,7 +37,7 @@ pub const Value = union(ValueTag) {
     pub fn fromTokenKind(kind: TokenKind) !Value {
         return switch (kind) {
             .BooleanLiteral => |value| Value{ .Bool = value },
-            .CharacterLiteral => |value| Value{ .Character = value },
+            .CharacterLiteral => |value| Value{ .Integer = value },
             .IntegerLiteral => |value| Value{ .Integer = value },
             .FloatLiteral => |value| Value{ .Float = value },
             .StringLiteral => |value| Value{ .String = value },
@@ -64,7 +61,6 @@ pub const Value = union(ValueTag) {
                 };
                 try fmt.format(writer, "{s}", .{str});
             },
-            .Character => |value| try fmt.format(writer, "'{c}'", .{value}),
             .Integer => |value| try fmt.format(writer, "{d}", .{value}),
             .Float => |value| try fmt.format(writer, "{d}", .{value}),
             .String => |value| try fmt.format(writer, "\"{s}\"", .{value}),
