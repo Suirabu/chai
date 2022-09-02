@@ -195,7 +195,7 @@ pub const CodeGenerator = struct {
         try writer.print(
             \\    ;; Exit program with exit code 0
             \\    mov rax, 60
-            \\    mov rbx, 0
+            \\    mov rdi, 0
             \\    syscall
             \\
         , .{});
