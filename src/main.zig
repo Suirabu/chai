@@ -62,9 +62,6 @@ pub fn main() !void {
         try code_generator.generate_x86_64_intel_linux();
     }
 
-    defer {
-        fs.cwd().deleteFile(".chai_out.asm") catch unreachable;
-    }
     _ = try std.ChildProcess.exec(.{ .allocator = arena.allocator(), .argv = &.{ "yasm", "-f", "elf64", ".chai_out.asm", "-o", ".chai_out.o" } });
     defer {
         fs.cwd().deleteFile(".chai_out.o") catch unreachable;
