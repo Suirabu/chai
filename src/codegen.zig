@@ -137,12 +137,10 @@ pub const CodeGenerator = struct {
 
         // Generate post-amble
         try writer.print(
-        // We really should be using the syscall instruction rather than calling interupt 80h,
-        // but I don't have Linux's syscall values on hand atm :P
             \\    ;; Exit program with exit code 0
-            \\    mov rax, 1
+            \\    mov rax, 60
             \\    mov rbx, 0
-            \\    int 80h
+            \\    syscall
             \\
         , .{});
     }
