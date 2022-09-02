@@ -136,6 +136,15 @@ pub const CodeGenerator = struct {
                         \\
                     , .{});
                 },
+                .Neg => {
+                    try writer.print(
+                        \\    pop rax
+                        \\    neg rax
+                        \\    push rax
+                        \\
+                    , .{});
+                },
+
                 .Drop => {
                     try writer.print(
                         \\    pop rax

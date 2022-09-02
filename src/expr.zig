@@ -77,6 +77,7 @@ pub const ExprKindTag = enum {
     Multiply,
     Divide,
     Mod,
+    Neg,
 
     Drop,
     Dup,
@@ -97,6 +98,7 @@ pub const ExprKind = union(ExprKindTag) {
     Multiply,
     Divide,
     Mod,
+    Neg,
 
     Drop,
     Dup,
@@ -115,6 +117,7 @@ pub const ExprKind = union(ExprKindTag) {
             .Multiply => "multiply",
             .Divide => "divide",
             .Mod => "mod",
+            .Neg => "neg",
 
             .Drop => "drop",
             .Dup => "dup",

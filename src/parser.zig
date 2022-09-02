@@ -66,6 +66,10 @@ pub const Parser = struct {
         const tok = self.advance();
         return Expr{ .kind = .Mod, .src_loc = tok.src_loc };
     }
+    fn collectNeg(self: *Self) !Expr {
+        const tok = self.advance();
+        return Expr{ .kind = .Neg, .src_loc = tok.src_loc };
+    }
 
     fn collectDrop(self: *Self) !Expr {
         const tok = self.advance();
@@ -101,6 +105,7 @@ pub const Parser = struct {
             .Star => self.collectMultiply(),
             .Slash => self.collectDivide(),
             .Perc => self.collectMod(),
+            .Neg => self.collectNeg(),
 
             .Drop => self.collectDrop(),
             .Dup => self.collectDup(),

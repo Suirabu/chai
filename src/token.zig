@@ -17,6 +17,7 @@ pub const TokenKindTag = enum {
     Star,
     Slash,
     Perc,
+    Neg,
 
     Drop,
     Dup,
@@ -42,6 +43,7 @@ pub const TokenKind = union(TokenKindTag) {
     Star,
     Slash,
     Perc,
+    Neg,
 
     Drop,
     Dup,
@@ -67,6 +69,7 @@ pub const TokenKind = union(TokenKindTag) {
             .Star => "multiply",
             .Slash => "divide",
             .Perc => "mod",
+            .Neg => "neg",
 
             .Drop => "drop",
             .Dup => "dup",

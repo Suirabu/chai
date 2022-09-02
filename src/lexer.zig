@@ -49,6 +49,7 @@ pub const Lexer = struct {
         try map.put("*", .Star);
         try map.put("/", .Slash);
         try map.put("%", .Perc);
+        try map.put("neg", .Neg);
 
         try map.put("drop", .Drop);
         try map.put("dup", .Dup);
