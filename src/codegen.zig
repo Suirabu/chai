@@ -75,18 +75,29 @@ pub const CodeGenerator = struct {
                     try writer.print(
                         \\    pop rbx
                         \\    pop rax
-                        \\    mult rax, rbx
+                        \\    mul rbx
                         \\    push rax
                         \\
                     , .{});
                 },
                 .Divide => {
-                    std.log.err("{}: Codegen for divide is currently unimplemented", .{e.src_loc});
-                    return error.Unimplemented;
+                    try writer.print(
+                        \\    pop rbx
+                        \\    pop rax
+                        \\    div rbx
+                        \\    push rax
+                        \\
+                    , .{});
                 },
                 .Mod => {
-                    std.log.err("{}: Codegen for mod is currently unimplemented", .{e.src_loc});
-                    return error.Unimplemented;
+                    try writer.print(
+                        \\    mov rdx, 0
+                        \\    pop rbx
+                        \\    pop rax
+                        \\    div rbx
+                        \\    push rdx
+                        \\
+                    , .{});
                 },
                 .Drop => {
                     try writer.print(
