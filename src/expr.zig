@@ -83,6 +83,8 @@ pub const ExprKindTag = enum {
     Over,
     Swap,
     Rot,
+
+    Print,
 };
 
 pub const ExprKind = union(ExprKindTag) {
@@ -102,6 +104,8 @@ pub const ExprKind = union(ExprKindTag) {
     Swap,
     Rot,
 
+    Print,
+
     pub fn getHumanName(self: Self) []const u8 {
         return switch (self) {
             .Push => "push",
@@ -117,6 +121,8 @@ pub const ExprKind = union(ExprKindTag) {
             .Over => "over",
             .Swap => "swap",
             .Rot => "rot",
+
+            .Print => "print",
         };
     }
 

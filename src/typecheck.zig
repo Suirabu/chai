@@ -193,6 +193,17 @@ pub const TypeChecker = struct {
                     try self.type_stack.append(t3);
                     try self.type_stack.append(t1);
                 },
+                .Print => {
+                    if (self.type_stack.items.len < 1) {
+                        std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
+                        return error.NotEnoughElements;
+                    }
+                    const t = self.type_stack.pop();
+                    if (t != .Integer) {
+                        std.log.err("{}: Invalid type {s} used with print operation. Modulo operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
+                        return error.InvalidType;
+                    }
+                },
             }
         }
 
