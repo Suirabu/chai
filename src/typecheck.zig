@@ -151,7 +151,7 @@ pub const TypeChecker = struct {
                     }
                     const t = self.type_stack.pop();
                     if (t != .Integer) {
-                        std.log.err("{}: Invalid type {s} used with print operation. Modulo operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
+                        std.log.err("{}: Invalid type {s} used with negation operation. Negation operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
                         return error.InvalidType;
                     }
                     try self.type_stack.append(t);
@@ -213,7 +213,7 @@ pub const TypeChecker = struct {
                     }
                     const t = self.type_stack.pop();
                     if (t != .Integer) {
-                        std.log.err("{}: Invalid type {s} used with print operation. Modulo operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
+                        std.log.err("{}: Invalid type {s} used with print operation. Print operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
                         return error.InvalidType;
                     }
                 },
