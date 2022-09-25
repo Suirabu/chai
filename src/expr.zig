@@ -129,6 +129,32 @@ pub const ExprKind = union(ExprKindTag) {
         };
     }
 
+    pub fn fromTokenKind(kind: TokenKind) !ExprKind {
+        return switch (kind) {
+            .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral => ExprKind{ .Push = try Value.fromTokenKind(kind) },
+
+            .Plus => .Plus,
+            .Minus => .Minus,
+            .Star => .Multiply,
+            .Slash => .Divide,
+            .Perc => .Mod,
+            .Neg => .Neg,
+
+            .Drop => .Drop,
+            .Dup => .Dup,
+            .Over => .Over,
+            .Swap => .Swap,
+            .Rot => .Rot,
+
+            .Print => .Print,
+
+            else => {
+                std.log.err("Failed to convert token of kind '{s}' to expr", .{kind.getHumanName()});
+                return error.ExprConversion;
+            },
+        };
+    }
+
     pub fn format(self: Self, comptime layout: []const u8, opts: fmt.FormatOptions, writer: anytype) !void {
         _ = layout;
         _ = opts;
