@@ -50,7 +50,7 @@ pub const Parser = struct {
             // zig fmt really loves screwing this one up
             .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral, .Plus, .Minus, .Star, .Slash, .Perc, .Neg, .Drop, .Dup, .Over, .Swap, .Rot, .Print => return self.collectSimpleExpr(),
 
-            else => {
+            .Identifier => {
                 std.log.err("{}: Cannot parse expression from token '{s}'", .{ self.peek().src_loc, self.peek().kind.getHumanName() });
                 _ = self.advance();
                 return error.ParserError;
