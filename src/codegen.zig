@@ -71,133 +71,7 @@ pub const CodeGenerator = struct {
         , .{});
 
         for (self.exprs) |e| {
-            try writer.print("    ;; {s}\n", .{e.kind});
-
-            switch (e.kind) {
-                .Push => |value| {
-                    const tag: ValueTag = value;
-                    switch (tag) {
-                        .Integer => {
-                            try writer.print(
-                                \\    mov rax, {d}
-                                \\    push rax
-                                \\
-                            , .{value});
-                        },
-                        else => {
-                            std.log.err("{}: Codegen for {} expression is unimplemented", .{ e.src_loc, e.kind });
-                            return error.Unimplemented;
-                        },
-                    }
-                },
-                .Plus => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    add rax, rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Minus => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    sub rax, rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Multiply => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    mul rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Divide => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    div rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Mod => {
-                    try writer.print(
-                        \\    mov rdx, 0
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    div rbx
-                        \\    push rdx
-                        \\
-                    , .{});
-                },
-                .Neg => {
-                    try writer.print(
-                        \\    pop rax
-                        \\    neg rax
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-
-                .Drop => {
-                    try writer.print(
-                        \\    pop rax
-                        \\
-                    , .{});
-                },
-                .Dup => {
-                    try writer.print(
-                        \\    pop rax
-                        \\    push rax
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Over => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    push rax
-                        \\    push rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Swap => {
-                    try writer.print(
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    push rbx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-                .Rot => {
-                    try writer.print(
-                        \\    pop rcx
-                        \\    pop rbx
-                        \\    pop rax
-                        \\    push rbx
-                        \\    push rcx
-                        \\    push rax
-                        \\
-                    , .{});
-                },
-
-                .Print => {
-                    try writer.print(
-                        \\    pop rdi
-                        \\    call print
-                        \\
-                    , .{});
-                },
-            }
+            try write_instruction_x86_64_intel_linux(e, writer);
         }
 
         // Generate post-amble
@@ -208,5 +82,135 @@ pub const CodeGenerator = struct {
             \\    syscall
             \\
         , .{});
+    }
+
+    pub fn write_instruction_x86_64_intel_linux(e: Expr, writer: anytype) !void {
+        try writer.print("    ;; {s}\n", .{e.kind});
+
+        switch (e.kind) {
+            .Push => |value| {
+                const tag: ValueTag = value;
+                switch (tag) {
+                    .Integer => {
+                        try writer.print(
+                            \\    mov rax, {d}
+                            \\    push rax
+                            \\
+                        , .{value});
+                    },
+                    else => {
+                        std.log.err("{}: Codegen for {} expression is unimplemented", .{ e.src_loc, e.kind });
+                        return error.Unimplemented;
+                    },
+                }
+            },
+            .Plus => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    add rax, rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Minus => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    sub rax, rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Multiply => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    mul rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Divide => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    div rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Mod => {
+                try writer.print(
+                    \\    mov rdx, 0
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    div rbx
+                    \\    push rdx
+                    \\
+                , .{});
+            },
+            .Neg => {
+                try writer.print(
+                    \\    pop rax
+                    \\    neg rax
+                    \\    push rax
+                    \\
+                , .{});
+            },
+
+            .Drop => {
+                try writer.print(
+                    \\    pop rax
+                    \\
+                , .{});
+            },
+            .Dup => {
+                try writer.print(
+                    \\    pop rax
+                    \\    push rax
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Over => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    push rax
+                    \\    push rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Swap => {
+                try writer.print(
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    push rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Rot => {
+                try writer.print(
+                    \\    pop rcx
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    push rbx
+                    \\    push rcx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+
+            .Print => {
+                try writer.print(
+                    \\    pop rdi
+                    \\    call print
+                    \\
+                , .{});
+            },
+        }
     }
 };
