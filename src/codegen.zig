@@ -11,14 +11,23 @@ const ValueTag = expr.ValueTag;
 pub const CodeGenerator = struct {
     const Self = @This();
 
+    /// This counter is used to assign a unique number to labels as needed
+    counter: usize,
     exprs: []Expr,
     out_file: File,
 
     pub fn init(exprs: []Expr, out_file: File) Self {
         return Self{
+            .counter = 0,
             .exprs = exprs,
             .out_file = out_file,
         };
+    }
+
+    pub fn incrementCounter(self: *Self) usize {
+        const val = self.counter;
+        self.counter += 1;
+        return val;
     }
 
     pub fn generate_x86_64_intel_linux(self: *Self) !void {
@@ -36,7 +45,7 @@ pub const CodeGenerator = struct {
             \\    mov BYTE [rsp+31], 10
             \\    lea rcx, [rsp+30]
             \\
-            \\.L2:
+            \\.print_L2:
             \\    mov rax, rdi
             \\    lea r8, [rsp+32]
             \\    mul r9
@@ -53,7 +62,7 @@ pub const CodeGenerator = struct {
             \\    mov rdx, rcx
             \\    sub rcx, 1
             \\    cmp rax, 9
-            \\    ja  .L2
+            \\    ja  .print_L2
             \\    lea rax, [rsp+32]
             \\    mov edi, 1
             \\    sub rdx, rax
@@ -71,7 +80,7 @@ pub const CodeGenerator = struct {
         , .{});
 
         for (self.exprs) |e| {
-            try write_instruction_x86_64_intel_linux(e, writer);
+            try self.write_instruction_x86_64_intel_linux(e, writer);
         }
 
         // Generate post-amble
@@ -84,7 +93,7 @@ pub const CodeGenerator = struct {
         , .{});
     }
 
-    pub fn write_instruction_x86_64_intel_linux(e: Expr, writer: anytype) !void {
+    pub fn write_instruction_x86_64_intel_linux(self: *Self, e: Expr, writer: anytype) !void {
         try writer.print("    ;; {s}\n", .{e.kind});
 
         switch (e.kind) {
@@ -97,6 +106,21 @@ pub const CodeGenerator = struct {
                             \\    push rax
                             \\
                         , .{value});
+                    },
+                    .Bool => {
+                        // I don't understand how if expressions work :'(
+                        var numValue: usize = undefined;
+                        if (value.Bool) {
+                            numValue = 1;
+                        } else {
+                            numValue = 0;
+                        }
+
+                        try writer.print(
+                            \\    mov rax, {d}
+                            \\    push rax
+                            \\
+                        , .{numValue});
                     },
                     else => {
                         std.log.err("{}: Codegen for {} expression is unimplemented", .{ e.src_loc, e.kind });
@@ -210,6 +234,26 @@ pub const CodeGenerator = struct {
                     \\    call print
                     \\
                 , .{});
+            },
+
+            .If => |exprs| {
+                const label_value = self.incrementCounter();
+
+                try writer.print(
+                    \\    pop rax
+                    \\    cmp rax, 0
+                    \\    je .if_{d}
+                    \\
+                , .{label_value});
+
+                for (exprs) |se| {
+                    try self.write_instruction_x86_64_intel_linux(se, writer);
+                }
+
+                try writer.print(
+                    \\.if_{d}:
+                    \\
+                , .{label_value});
             },
         }
     }

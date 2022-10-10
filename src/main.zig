@@ -49,7 +49,7 @@ pub fn main() !void {
     const exprs = try parser.collectExprs();
 
     var type_checker = TypeChecker.init(exprs, arena.allocator());
-    try type_checker.check();
+    try type_checker.check_program();
 
     // Code generation
     {

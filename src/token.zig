@@ -12,6 +12,9 @@ pub const TokenKindTag = enum {
 
     Identifier,
 
+    LeftBrace,
+    RightBrace,
+
     Plus,
     Minus,
     Star,
@@ -25,6 +28,8 @@ pub const TokenKindTag = enum {
     Swap,
     Rot,
     Print,
+
+    If,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -38,6 +43,9 @@ pub const TokenKind = union(TokenKindTag) {
 
     Identifier: []const u8,
 
+    LeftBrace,
+    RightBrace,
+
     Plus,
     Minus,
     Star,
@@ -52,6 +60,8 @@ pub const TokenKind = union(TokenKindTag) {
     Rot,
     Print,
 
+    If,
+
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
 
@@ -63,6 +73,9 @@ pub const TokenKind = union(TokenKindTag) {
             .BooleanLiteral => "boolean literal",
 
             .Identifier => "identifier",
+
+            .LeftBrace => "left brace",
+            .RightBrace => "right brace",
 
             .Plus => "plus",
             .Minus => "minus",
@@ -78,6 +91,8 @@ pub const TokenKind = union(TokenKindTag) {
             .Rot => "rot",
 
             .Print => "print",
+
+            .If => "if",
         };
     }
 };
