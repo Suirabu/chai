@@ -140,6 +140,6 @@ pub const SrcLoc = struct {
     pub fn format(self: Self, comptime layout: []const u8, opts: fmt.FormatOptions, writer: anytype) !void {
         _ = layout;
         _ = opts;
-        try fmt.format(writer, "{s} ({d},{d})", .{ self.path, self.line + 1, self.column });
+        try fmt.format(writer, "{s} ({d},{d})", .{ self.path, self.line + 1, self.column + 1 });
     }
 };
