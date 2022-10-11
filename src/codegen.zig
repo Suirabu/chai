@@ -236,22 +236,34 @@ pub const CodeGenerator = struct {
                 , .{});
             },
 
-            .If => |exprs| {
+            .If => |stmt| {
                 const label_value = self.incrementCounter();
 
                 try writer.print(
                     \\    pop rax
                     \\    cmp rax, 0
-                    \\    je .if_{d}
+                    \\    je .if_{d}_else
                     \\
                 , .{label_value});
 
-                for (exprs) |se| {
+                for (stmt.main_body) |se| {
                     try self.write_instruction_x86_64_intel_linux(se, writer);
                 }
 
                 try writer.print(
-                    \\.if_{d}:
+                    \\    jmp .if_{d}_end
+                    \\.if_{d}_else:
+                    \\
+                , .{ label_value, label_value });
+
+                if (stmt.else_body) |else_body| {
+                    for (else_body) |se| {
+                        try self.write_instruction_x86_64_intel_linux(se, writer);
+                    }
+                }
+
+                try writer.print(
+                    \\.if_{d}_end:
                     \\
                 , .{label_value});
             },

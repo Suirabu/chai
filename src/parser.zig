@@ -81,7 +81,14 @@ pub const Parser = struct {
     fn collectIf(self: *Self) !Expr {
         const tok = try self.expect(.If);
         const body = try self.collectBody();
-        return Expr{ .kind = ExprKind{ .If = body }, .src_loc = tok.src_loc };
+
+        var else_body: ?[]Expr = null;
+        if (!self.reachedEnd() and self.peek().kind == .Else) {
+            _ = self.advance();
+            else_body = try self.collectBody();
+        }
+
+        return Expr{ .kind = ExprKind{ .If = .{ .main_body = body, .else_body = else_body } }, .src_loc = tok.src_loc };
     }
 
     fn collectExpr(self: *Self) !Expr {
@@ -90,7 +97,7 @@ pub const Parser = struct {
             .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral, .Plus, .Minus, .Star, .Slash, .Perc, .Neg, .Drop, .Dup, .Over, .Swap, .Rot, .Print => return self.collectSimpleExpr(),
             .If => self.collectIf(),
 
-            .Identifier, .LeftBrace, .RightBrace => {
+            .Identifier, .LeftBrace, .RightBrace, .Else => {
                 std.log.err("{}: Cannot parse expression from token '{s}'", .{ self.peek().src_loc, self.peek().kind.getHumanName() });
                 _ = self.advance();
                 return error.ParserError;

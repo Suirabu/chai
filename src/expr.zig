@@ -110,7 +110,7 @@ pub const ExprKind = union(ExprKindTag) {
 
     Print,
 
-    If: []Expr,
+    If: struct { main_body: []Expr, else_body: ?[]Expr },
 
     pub fn getHumanName(self: Self) []const u8 {
         return switch (self) {

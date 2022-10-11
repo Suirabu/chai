@@ -30,6 +30,7 @@ pub const TokenKindTag = enum {
     Print,
 
     If,
+    Else,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -61,6 +62,7 @@ pub const TokenKind = union(TokenKindTag) {
     Print,
 
     If,
+    Else,
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
@@ -93,6 +95,7 @@ pub const TokenKind = union(TokenKindTag) {
             .Print => "print",
 
             .If => "if",
+            .Else => "else",
         };
     }
 };

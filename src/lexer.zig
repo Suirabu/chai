@@ -63,6 +63,7 @@ pub const Lexer = struct {
         try map.put("print", .Print);
 
         try map.put("if", .If);
+        try map.put("else", .Else);
 
         return map;
     }

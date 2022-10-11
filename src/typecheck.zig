@@ -1,5 +1,6 @@
 const std = @import("std");
-const Allocator = std.mem.Allocator;
+const mem = std.mem;
+const Allocator = mem.Allocator;
 const ValueTagArrayList = std.ArrayList(ValueTag);
 
 const expr = @import("expr.zig");
@@ -15,12 +16,14 @@ pub const TypeChecker = struct {
     exprs: []Expr,
     cursor: usize,
     type_stack: ValueTagArrayList,
+    allocator: Allocator,
 
     pub fn init(exprs: []Expr, allocator: Allocator) Self {
         return Self{
             .exprs = exprs,
             .cursor = 0,
             .type_stack = ValueTagArrayList.init(allocator),
+            .allocator = allocator,
         };
     }
 
@@ -229,7 +232,7 @@ pub const TypeChecker = struct {
             },
 
             // TODO: Typecheck contents of if expressions
-            .If => |exprs| {
+            .If => |stmt| {
                 if (self.type_stack.items.len < 1) {
                     std.log.err("{}: Expected at least 1 element on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
                     return error.NotEnoughElements;
@@ -240,8 +243,29 @@ pub const TypeChecker = struct {
                     return error.InvalidType;
                 }
 
-                for (exprs) |se| {
+                // Ensure that all possible paths affect the stack in the same way for type safety reasons
+                var state = try self.type_stack.clone();
+
+                for (stmt.main_body) |se| {
                     try self.check_expr(se);
+                }
+
+                // Get assumed type signature
+                var type_signature = try self.type_stack.clone();
+
+                if (stmt.else_body) |else_body| {
+                    // Reset type stack to test alternate paths
+                    self.type_stack = state;
+
+                    for (else_body) |se| {
+                        try self.check_expr(se);
+                    }
+
+                    // Compare type stack to type signature
+                    if (!mem.eql(ValueTag, self.type_stack.items, type_signature.items)) {
+                        std.log.err("{}: Code paths return different values", .{e.src_loc});
+                        return error.UnequalSignatures;
+                    }
                 }
             },
         }
