@@ -41,6 +41,15 @@ pub const TypeChecker = struct {
         return e;
     }
 
+    fn expect_minimum_elements(self: Self, e: Expr, min: usize) !void {
+        const stack_len = self.type_stack.items.len;
+
+        if (stack_len < min) {
+            std.log.err("{}: Expression '{s}' expected at least {d} element(s) on stack, found {d} instead", .{ e.src_loc, e.kind.getHumanName(), min, stack_len });
+            return error.NotEnoughElements;
+        }
+    }
+
     pub fn check_program(self: *Self) !void {
         while (!self.reached_end()) {
             try self.check_expr(self.advance());
@@ -64,10 +73,7 @@ pub const TypeChecker = struct {
                 }
             },
             .Plus => {
-                if (self.type_stack.items.len < 2) {
-                    std.log.err("{}: Expected at least 2 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 // Make sure the correct types are being used
@@ -90,10 +96,7 @@ pub const TypeChecker = struct {
                 }
             },
             .Minus => {
-                if (self.type_stack.items.len < 2) {
-                    std.log.err("{}: Expected at least 2 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 // Make sure the correct types are being used
@@ -116,10 +119,7 @@ pub const TypeChecker = struct {
                 }
             },
             .Multiply, .Divide => {
-                if (self.type_stack.items.len < 2) {
-                    std.log.err("{}: Expected at least 2 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 // Make sure the correct types are being used
@@ -140,10 +140,7 @@ pub const TypeChecker = struct {
                 }
             },
             .Mod => {
-                if (self.type_stack.items.len < 2) {
-                    std.log.err("{}: Expected at least 2 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 // Make sure the correct types are being used
@@ -158,10 +155,7 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(t1);
             },
             .Neg => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 1);
                 const t = self.type_stack.pop();
                 if (t != .Integer) {
                     std.log.err("{}: Invalid type {s} used with negation operation. Negation operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
@@ -171,26 +165,17 @@ pub const TypeChecker = struct {
             },
 
             .Drop => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 1);
                 _ = self.type_stack.pop();
             },
             .Dup => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 1);
                 const t = self.type_stack.pop();
                 try self.type_stack.append(t);
                 try self.type_stack.append(t);
             },
             .Over => {
-                if (self.type_stack.items.len < 2) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 try self.type_stack.append(t1);
@@ -198,20 +183,14 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(t1);
             },
             .Swap => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 try self.type_stack.append(t2);
                 try self.type_stack.append(t1);
             },
             .Rot => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 3);
                 const t3 = self.type_stack.pop();
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
@@ -220,23 +199,15 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(t1);
             },
             .Print => {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 elements on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 1);
                 const t = self.type_stack.pop();
                 if (t != .Integer) {
                     std.log.err("{}: Invalid type {s} used with print operation. Print operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
                     return error.InvalidType;
                 }
             },
-
-            // TODO: Typecheck contents of if expressions
             .If => |stmt| {
-                if (self.type_stack.items.len < 1) {
-                    std.log.err("{}: Expected at least 1 element on stack, found {d} instead", .{ e.src_loc, self.type_stack.items.len });
-                    return error.NotEnoughElements;
-                }
+                try self.expect_minimum_elements(e, 1);
                 const t = self.type_stack.pop();
                 if (t != .Bool) {
                     std.log.err("{}: Invalid type {s} used in if statement. If statements only accept boolean values", .{ e.src_loc, t.getHumanName() });
