@@ -50,6 +50,19 @@ pub const TypeChecker = struct {
         }
     }
 
+    fn expect_type(self: *Self, e: Expr, valid_types: anytype) !ValueTag {
+        const t = self.type_stack.pop();
+        inline for (valid_types) |valid_type| {
+            if (t == valid_type) {
+                return t;
+            }
+        }
+
+        // TODO: Include allowed types in diagnostic
+        std.log.err("{}: Invalid type '{s}' used with expression '{s}'", .{ e.src_loc, t.getHumanName(), e.kind.getHumanName() });
+        return error.InvalidType;
+    }
+
     pub fn check_program(self: *Self) !void {
         while (!self.reached_end()) {
             try self.check_expr(self.advance());
@@ -74,17 +87,11 @@ pub const TypeChecker = struct {
             },
             .Plus => {
                 try self.expect_minimum_elements(e, 2);
-                const t2 = self.type_stack.pop();
-                const t1 = self.type_stack.pop();
+
                 // Make sure the correct types are being used
-                if (t1 != .Integer and t1 != .Float and t1 != .Ptr) {
-                    std.log.err("{}: Invalid type {s} used with plus operation. Valid types include integers, floats, and pointers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
-                if (t2 != .Integer and t2 != .Float and t1 != .Ptr) {
-                    std.log.err("{}: Invalid type {s} used with plus operation. Valid types include integers, floats, and pointers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
+                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+
                 // Make sure the correct type combinations are being used
                 if ((t1 == .Ptr and t2 == .Integer) or (t1 == .Integer and t2 == .Ptr)) {
                     try self.type_stack.append(.Ptr);
@@ -97,17 +104,11 @@ pub const TypeChecker = struct {
             },
             .Minus => {
                 try self.expect_minimum_elements(e, 2);
-                const t2 = self.type_stack.pop();
-                const t1 = self.type_stack.pop();
+
                 // Make sure the correct types are being used
-                if (t1 != .Integer and t1 != .Float and t1 != .Ptr) {
-                    std.log.err("{}: Invalid type {s} used with minus operation. Valid types include integers, floats, and pointers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
-                if (t2 != .Integer and t2 != .Float and t1 != .Ptr) {
-                    std.log.err("{}: Invalid type {s} used with minus operation. Valid types include integers, floats, and pointers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
+                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+
                 // Make sure the correct type combinations are being used
                 if ((t1 == .Ptr and t2 == .Integer) or (t1 == .Integer and t2 == .Ptr)) {
                     try self.type_stack.append(.Ptr);
@@ -120,17 +121,11 @@ pub const TypeChecker = struct {
             },
             .Multiply, .Divide => {
                 try self.expect_minimum_elements(e, 2);
-                const t2 = self.type_stack.pop();
-                const t1 = self.type_stack.pop();
+
                 // Make sure the correct types are being used
-                if (t1 != .Integer and t1 != .Float) {
-                    std.log.err("{}: Invalid type {s} used with {s} operation. Valid types include integers, and floats", .{ e.src_loc, e.kind.getHumanName(), t2.getHumanName() });
-                    return error.InvalidType;
-                }
-                if (t2 != .Integer and t2 != .Float) {
-                    std.log.err("{}: Invalid type {s} used with {s} operation. Valid types include integers, and floats", .{ e.src_loc, e.kind.getHumanName(), t2.getHumanName() });
-                    return error.InvalidType;
-                }
+                const t2 = try self.expect_type(e, .{ .Integer, .Float });
+                const t1 = try self.expect_type(e, .{ .Integer, .Float });
+
                 // Make sure the correct type combinations are being used
                 if (t1 == t2) {
                     try self.type_stack.append(t1);
@@ -141,26 +136,16 @@ pub const TypeChecker = struct {
             },
             .Mod => {
                 try self.expect_minimum_elements(e, 2);
-                const t2 = self.type_stack.pop();
-                const t1 = self.type_stack.pop();
+
                 // Make sure the correct types are being used
-                if (t1 != .Integer) {
-                    std.log.err("{}: Invalid type {s} used with mod operation. Modulo operations may only be performed on integers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
-                if (t2 != .Integer) {
-                    std.log.err("{}: Invalid type {s} used with mod operation. Modulo operations may only be performed on integers", .{ e.src_loc, t2.getHumanName() });
-                    return error.InvalidType;
-                }
-                try self.type_stack.append(t1);
+                _ = try self.expect_type(e, .{.Integer});
+                _ = try self.expect_type(e, .{.Integer});
+
+                try self.type_stack.append(.Integer);
             },
             .Neg => {
                 try self.expect_minimum_elements(e, 1);
-                const t = self.type_stack.pop();
-                if (t != .Integer) {
-                    std.log.err("{}: Invalid type {s} used with negation operation. Negation operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
-                    return error.InvalidType;
-                }
+                const t = try self.expect_type(e, .{.Integer});
                 try self.type_stack.append(t);
             },
 
@@ -200,19 +185,11 @@ pub const TypeChecker = struct {
             },
             .Print => {
                 try self.expect_minimum_elements(e, 1);
-                const t = self.type_stack.pop();
-                if (t != .Integer) {
-                    std.log.err("{}: Invalid type {s} used with print operation. Print operations may only be performed on integers", .{ e.src_loc, t.getHumanName() });
-                    return error.InvalidType;
-                }
+                _ = try self.expect_type(e, .{.Integer});
             },
             .If => |stmt| {
                 try self.expect_minimum_elements(e, 1);
-                const t = self.type_stack.pop();
-                if (t != .Bool) {
-                    std.log.err("{}: Invalid type {s} used in if statement. If statements only accept boolean values", .{ e.src_loc, t.getHumanName() });
-                    return error.InvalidType;
-                }
+                _ = try self.expect_type(e, .{.Bool});
 
                 // Ensure that all possible paths affect the stack in the same way for type safety reasons
                 var state = try self.type_stack.clone();
