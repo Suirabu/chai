@@ -94,7 +94,7 @@ pub const Parser = struct {
     fn collectExpr(self: *Self) !Expr {
         return switch (self.peek().kind) {
             // zig fmt really loves screwing this one up
-            .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral, .Plus, .Minus, .Star, .Slash, .Perc, .Neg, .Drop, .Dup, .Over, .Swap, .Rot, .Print => return self.collectSimpleExpr(),
+            .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral, .Plus, .Minus, .Star, .Slash, .Perc, .Neg, .Equal, .Less, .LessEqual, .Greater, .GreaterEqual, .Not, .And, .Or, .Drop, .Dup, .Over, .Swap, .Rot, .Print => return self.collectSimpleExpr(),
             .If => self.collectIf(),
 
             .Identifier, .LeftBrace, .RightBrace, .Else => {

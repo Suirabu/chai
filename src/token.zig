@@ -22,6 +22,15 @@ pub const TokenKindTag = enum {
     Perc,
     Neg,
 
+    Equal,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Not,
+    And,
+    Or,
+
     Drop,
     Dup,
     Over,
@@ -54,6 +63,15 @@ pub const TokenKind = union(TokenKindTag) {
     Perc,
     Neg,
 
+    Equal,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Not,
+    And,
+    Or,
+
     Drop,
     Dup,
     Over,
@@ -85,6 +103,15 @@ pub const TokenKind = union(TokenKindTag) {
             .Slash => "divide",
             .Perc => "mod",
             .Neg => "neg",
+
+            .Equal => "equal",
+            .Less => "less than",
+            .LessEqual => "less than or equal",
+            .Greater => "greater than",
+            .GreaterEqual => "greater than or equal",
+            .Not => "not",
+            .And => "and",
+            .Or => "or",
 
             .Drop => "drop",
             .Dup => "dup",

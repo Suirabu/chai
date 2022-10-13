@@ -183,6 +183,96 @@ pub const CodeGenerator = struct {
                 , .{});
             },
 
+            .Equal => {
+                try writer.print(
+                    \\    mov rcx, 0
+                    \\    mov rdx, 1
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    cmp rax, rbx
+                    \\    cmove rcx, rdx
+                    \\    push rcx
+                    \\
+                , .{});
+            },
+            .Less => {
+                try writer.print(
+                    \\    mov rcx, 0
+                    \\    mov rdx, 1
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    cmp rax, rbx
+                    \\    cmovl rcx, rdx
+                    \\    push rcx
+                    \\
+                , .{});
+            },
+            .LessEqual => {
+                try writer.print(
+                    \\    mov rcx, 0
+                    \\    mov rdx, 1
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    cmp rax, rbx
+                    \\    cmovle rcx, rdx
+                    \\    push rcx
+                    \\
+                , .{});
+            },
+            .Greater => {
+                try writer.print(
+                    \\    mov rcx, 0
+                    \\    mov rdx, 1
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    cmp rax, rbx
+                    \\    cmovg rcx, rdx
+                    \\    push rcx
+                    \\
+                , .{});
+            },
+            .GreaterEqual => {
+                try writer.print(
+                    \\    mov rcx, 0
+                    \\    mov rdx, 1
+                    \\    pop rbx
+                    \\    pop rax
+                    \\    cmp rax, rbx
+                    \\    cmovge rcx, rdx
+                    \\    push rcx
+                    \\
+                , .{});
+            },
+            .Not => {
+                try writer.print(
+                    \\    mov rbx, 0
+                    \\    mov rcx, 1
+                    \\    pop rax
+                    \\    cmp rax, 0
+                    \\    cmove rbx, rcx
+                    \\    push rbx
+                    \\
+                , .{});
+            },
+            .And => {
+                try writer.print(
+                    \\    pop rax
+                    \\    pop rbx
+                    \\    and rax, rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+            .Or => {
+                try writer.print(
+                    \\    pop rax
+                    \\    pop rbx
+                    \\    or rax, rbx
+                    \\    push rax
+                    \\
+                , .{});
+            },
+
             .Drop => {
                 try writer.print(
                     \\    pop rax

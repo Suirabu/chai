@@ -79,6 +79,15 @@ pub const ExprKindTag = enum {
     Mod,
     Neg,
 
+    Equal,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Not,
+    And,
+    Or,
+
     Drop,
     Dup,
     Over,
@@ -102,6 +111,15 @@ pub const ExprKind = union(ExprKindTag) {
     Mod,
     Neg,
 
+    Equal,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Not,
+    And,
+    Or,
+
     Drop,
     Dup,
     Over,
@@ -122,6 +140,15 @@ pub const ExprKind = union(ExprKindTag) {
             .Divide => "divide",
             .Mod => "mod",
             .Neg => "neg",
+
+            .Equal => "equal",
+            .Less => "less than",
+            .LessEqual => "less than or equal",
+            .Greater => "greater than",
+            .GreaterEqual => "greater than or equal",
+            .Not => "not",
+            .And => "and",
+            .Or => "or",
 
             .Drop => "drop",
             .Dup => "dup",
@@ -145,6 +172,15 @@ pub const ExprKind = union(ExprKindTag) {
             .Slash => .Divide,
             .Perc => .Mod,
             .Neg => .Neg,
+
+            .Equal => .Equal,
+            .Less => .Less,
+            .LessEqual => .LessEqual,
+            .Greater => .Greater,
+            .GreaterEqual => .GreaterEqual,
+            .Not => .Not,
+            .And => .And,
+            .Or => .Or,
 
             .Drop => .Drop,
             .Dup => .Dup,

@@ -54,6 +54,15 @@ pub const Lexer = struct {
         try map.put("%", .Perc);
         try map.put("neg", .Neg);
 
+        try map.put("=", .Equal);
+        try map.put("<", .Less);
+        try map.put("<=", .LessEqual);
+        try map.put(">", .Greater);
+        try map.put(">=", .GreaterEqual);
+        try map.put("not", .Not);
+        try map.put("and", .And);
+        try map.put("or", .Or);
+
         try map.put("drop", .Drop);
         try map.put("dup", .Dup);
         try map.put("over", .Over);

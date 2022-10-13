@@ -148,7 +148,39 @@ pub const TypeChecker = struct {
                 const t = try self.expect_type(e, .{.Integer});
                 try self.type_stack.append(t);
             },
-
+            .Equal => {
+                try self.expect_minimum_elements(e, 2);
+                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Bool });
+                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Bool });
+                if (t1 != t2) {
+                    // TODO: Checking if two types are equal is a really common pattern used in typechecking. Consider making a function for this.
+                    std.log.err("{}: Cannot use types {s} and {s} together in equal operation", .{ e.src_loc, t1.getHumanName(), t2.getHumanName() });
+                    return error.InvalidTypeCombination;
+                }
+                try self.type_stack.append(.Bool);
+            },
+            .Less, .LessEqual, .Greater, .GreaterEqual => {
+                try self.expect_minimum_elements(e, 2);
+                const t1 = try self.expect_type(e, .{ .Integer, .Float });
+                const t2 = try self.expect_type(e, .{ .Integer, .Float });
+                if (t1 != t2) {
+                    // TODO: Checking if two types are equal is a really common pattern used in typechecking. Consider making a function for this.
+                    std.log.err("{}: Cannot use types {s} and {s} together in {s} operation", .{ e.src_loc, t1.getHumanName(), t2.getHumanName(), e.kind.getHumanName() });
+                    return error.InvalidTypeCombination;
+                }
+                try self.type_stack.append(.Bool);
+            },
+            .Not => {
+                try self.expect_minimum_elements(e, 1);
+                _ = try self.expect_type(e, .{.Bool});
+                try self.type_stack.append(.Bool);
+            },
+            .And, .Or => {
+                try self.expect_minimum_elements(e, 2);
+                _ = try self.expect_type(e, .{.Bool});
+                _ = try self.expect_type(e, .{.Bool});
+                try self.type_stack.append(.Bool);
+            },
             .Drop => {
                 try self.expect_minimum_elements(e, 1);
                 _ = self.type_stack.pop();
