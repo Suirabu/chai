@@ -1,7 +1,7 @@
 const std = @import("std");
 const fs = std.fs;
 
-const parse_args = @import("args.zig").parse_args;
+const parseArgs = @import("args.zig").parseArgs;
 const Lexer = @import("lexer.zig").Lexer;
 const Parser = @import("parser.zig").Parser;
 const TypeChecker = @import("typecheck.zig").TypeChecker;
@@ -22,7 +22,7 @@ pub fn main() !void {
 
     // Collect command line arguments
     var args = try std.process.argsWithAllocator(allocator);
-    const opts = try parse_args(args);
+    const opts = try parseArgs(args);
     const source_path = opts.source_path orelse {
         std.log.err("No source path provied", .{});
         return error.MissingSourcePath;
@@ -56,7 +56,7 @@ pub fn main() !void {
     }
 
     var type_checker = TypeChecker.init(exprs, allocator);
-    try type_checker.check_program();
+    try type_checker.checkProgram();
 
     // Code generation
     {
@@ -64,7 +64,7 @@ pub fn main() !void {
         defer out_file.close();
 
         var code_generator = CodeGenerator.init(exprs, out_file);
-        try code_generator.generate_x86_64_intel_linux();
+        try code_generator.generateX86_64IntelLinux();
     }
 
     _ = try std.ChildProcess.exec(.{ .allocator = allocator, .argv = &.{ "yasm", "-f", "elf64", ".chai_out.asm", "-o", ".chai_out.o" } });

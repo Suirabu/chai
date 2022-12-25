@@ -27,7 +27,7 @@ pub const TypeChecker = struct {
         };
     }
 
-    fn reached_end(self: Self) bool {
+    fn reachedEnd(self: Self) bool {
         return self.cursor >= self.exprs.len;
     }
 
@@ -41,7 +41,7 @@ pub const TypeChecker = struct {
         return e;
     }
 
-    fn expect_minimum_elements(self: Self, e: Expr, min: usize) !void {
+    fn expectMinimumElements(self: Self, e: Expr, min: usize) !void {
         const stack_len = self.type_stack.items.len;
 
         if (stack_len < min) {
@@ -50,7 +50,7 @@ pub const TypeChecker = struct {
         }
     }
 
-    fn expect_type(self: *Self, e: Expr, valid_types: anytype) !ValueTag {
+    fn expectType(self: *Self, e: Expr, valid_types: anytype) !ValueTag {
         const t = self.type_stack.pop();
         inline for (valid_types) |valid_type| {
             if (t == valid_type) {
@@ -63,9 +63,9 @@ pub const TypeChecker = struct {
         return error.InvalidType;
     }
 
-    pub fn check_program(self: *Self) !void {
-        while (!self.reached_end()) {
-            try self.check_expr(self.advance());
+    pub fn checkProgram(self: *Self) !void {
+        while (!self.reachedEnd()) {
+            try self.checkExpr(self.advance());
         }
 
         if (self.type_stack.items.len != 0) {
@@ -77,7 +77,7 @@ pub const TypeChecker = struct {
     }
 
     // TODO: Reduce code repitition
-    fn check_expr(self: *Self, e: Expr) !void {
+    fn checkExpr(self: *Self, e: Expr) !void {
         switch (e.kind) {
             .Push => |value| {
                 if (value == .String) {
@@ -88,11 +88,11 @@ pub const TypeChecker = struct {
                 }
             },
             .Plus => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
 
                 // Make sure the correct types are being used
-                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
-                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+                const t2 = try self.expectType(e, .{ .Integer, .Float, .Ptr });
+                const t1 = try self.expectType(e, .{ .Integer, .Float, .Ptr });
 
                 // Make sure the correct type combinations are being used
                 if ((t1 == .Ptr and t2 == .Integer) or (t1 == .Integer and t2 == .Ptr)) {
@@ -105,11 +105,11 @@ pub const TypeChecker = struct {
                 }
             },
             .Minus => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
 
                 // Make sure the correct types are being used
-                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
-                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Ptr });
+                const t2 = try self.expectType(e, .{ .Integer, .Float, .Ptr });
+                const t1 = try self.expectType(e, .{ .Integer, .Float, .Ptr });
 
                 // Make sure the correct type combinations are being used
                 if ((t1 == .Ptr and t2 == .Integer) or (t1 == .Integer and t2 == .Ptr)) {
@@ -122,11 +122,11 @@ pub const TypeChecker = struct {
                 }
             },
             .Multiply, .Divide => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
 
                 // Make sure the correct types are being used
-                const t2 = try self.expect_type(e, .{ .Integer, .Float });
-                const t1 = try self.expect_type(e, .{ .Integer, .Float });
+                const t2 = try self.expectType(e, .{ .Integer, .Float });
+                const t1 = try self.expectType(e, .{ .Integer, .Float });
 
                 // Make sure the correct type combinations are being used
                 if (t1 == t2) {
@@ -137,23 +137,23 @@ pub const TypeChecker = struct {
                 }
             },
             .Mod => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
 
                 // Make sure the correct types are being used
-                _ = try self.expect_type(e, .{.Integer});
-                _ = try self.expect_type(e, .{.Integer});
+                _ = try self.expectType(e, .{.Integer});
+                _ = try self.expectType(e, .{.Integer});
 
                 try self.type_stack.append(.Integer);
             },
             .Neg => {
-                try self.expect_minimum_elements(e, 1);
-                const t = try self.expect_type(e, .{.Integer});
+                try self.expectMinimumElements(e, 1);
+                const t = try self.expectType(e, .{.Integer});
                 try self.type_stack.append(t);
             },
             .Equal => {
-                try self.expect_minimum_elements(e, 2);
-                const t1 = try self.expect_type(e, .{ .Integer, .Float, .Bool });
-                const t2 = try self.expect_type(e, .{ .Integer, .Float, .Bool });
+                try self.expectMinimumElements(e, 2);
+                const t1 = try self.expectType(e, .{ .Integer, .Float, .Bool });
+                const t2 = try self.expectType(e, .{ .Integer, .Float, .Bool });
                 if (t1 != t2) {
                     // TODO: Checking if two types are equal is a really common pattern used in typechecking. Consider making a function for this.
                     std.log.err("{}: Cannot use types {s} and {s} together in equal operation", .{ e.src_loc, t1.getHumanName(), t2.getHumanName() });
@@ -162,9 +162,9 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(.Bool);
             },
             .Less, .LessEqual, .Greater, .GreaterEqual => {
-                try self.expect_minimum_elements(e, 2);
-                const t1 = try self.expect_type(e, .{ .Integer, .Float });
-                const t2 = try self.expect_type(e, .{ .Integer, .Float });
+                try self.expectMinimumElements(e, 2);
+                const t1 = try self.expectType(e, .{ .Integer, .Float });
+                const t2 = try self.expectType(e, .{ .Integer, .Float });
                 if (t1 != t2) {
                     // TODO: Checking if two types are equal is a really common pattern used in typechecking. Consider making a function for this.
                     std.log.err("{}: Cannot use types {s} and {s} together in {s} operation", .{ e.src_loc, t1.getHumanName(), t2.getHumanName(), e.kind.getHumanName() });
@@ -173,28 +173,28 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(.Bool);
             },
             .Not => {
-                try self.expect_minimum_elements(e, 1);
-                _ = try self.expect_type(e, .{.Bool});
+                try self.expectMinimumElements(e, 1);
+                _ = try self.expectType(e, .{.Bool});
                 try self.type_stack.append(.Bool);
             },
             .And, .Or => {
-                try self.expect_minimum_elements(e, 2);
-                _ = try self.expect_type(e, .{.Bool});
-                _ = try self.expect_type(e, .{.Bool});
+                try self.expectMinimumElements(e, 2);
+                _ = try self.expectType(e, .{.Bool});
+                _ = try self.expectType(e, .{.Bool});
                 try self.type_stack.append(.Bool);
             },
             .Drop => {
-                try self.expect_minimum_elements(e, 1);
+                try self.expectMinimumElements(e, 1);
                 _ = self.type_stack.pop();
             },
             .Dup => {
-                try self.expect_minimum_elements(e, 1);
+                try self.expectMinimumElements(e, 1);
                 const t = self.type_stack.pop();
                 try self.type_stack.append(t);
                 try self.type_stack.append(t);
             },
             .Over => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 try self.type_stack.append(t1);
@@ -202,14 +202,14 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(t1);
             },
             .Swap => {
-                try self.expect_minimum_elements(e, 2);
+                try self.expectMinimumElements(e, 2);
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
                 try self.type_stack.append(t2);
                 try self.type_stack.append(t1);
             },
             .Rot => {
-                try self.expect_minimum_elements(e, 3);
+                try self.expectMinimumElements(e, 3);
                 const t3 = self.type_stack.pop();
                 const t2 = self.type_stack.pop();
                 const t1 = self.type_stack.pop();
@@ -218,18 +218,18 @@ pub const TypeChecker = struct {
                 try self.type_stack.append(t1);
             },
             .Print => {
-                try self.expect_minimum_elements(e, 1);
-                _ = try self.expect_type(e, .{.Integer});
+                try self.expectMinimumElements(e, 1);
+                _ = try self.expectType(e, .{.Integer});
             },
             .If => |stmt| {
-                try self.expect_minimum_elements(e, 1);
-                _ = try self.expect_type(e, .{.Bool});
+                try self.expectMinimumElements(e, 1);
+                _ = try self.expectType(e, .{.Bool});
 
                 // Ensure that all possible paths affect the stack in the same way for type safety reasons
                 var state = try self.type_stack.clone();
 
                 for (stmt.main_body) |se| {
-                    try self.check_expr(se);
+                    try self.checkExpr(se);
                 }
 
                 // Get assumed type signature
@@ -240,7 +240,7 @@ pub const TypeChecker = struct {
                     self.type_stack = state;
 
                     for (else_body) |se| {
-                        try self.check_expr(se);
+                        try self.checkExpr(se);
                     }
 
                     // Compare type stack to type signature

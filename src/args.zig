@@ -8,7 +8,7 @@ pub const ArgOptions = struct {
     output_path: ?[]const u8,
 };
 
-pub fn parse_args(_args: ArgIterator) !ArgOptions {
+pub fn parseArgs(_args: ArgIterator) !ArgOptions {
     // This is a hack to get around the Zig compiler incorrectly marking the _args parameter as const
     var args = _args;
 
@@ -25,7 +25,7 @@ pub fn parse_args(_args: ArgIterator) !ArgOptions {
     while (args.next()) |arg| {
         if (eql(arg, "-h") or eql(arg, "--help")) {
             var stdout = std.io.getStdOut();
-            try display_help(stdout);
+            try displayHelp(stdout);
             std.process.exit(0);
         } else if (eql(arg, "-o") or eql(arg, "--output")) {
             opts.output_path = args.next() orelse {
@@ -43,7 +43,7 @@ pub fn parse_args(_args: ArgIterator) !ArgOptions {
     return opts;
 }
 
-fn display_usage(stream: File) !void {
+fn displayUsage(stream: File) !void {
     var writer = stream.writer();
     try writer.print(
         \\chai - Chai programming language compiler
@@ -56,7 +56,7 @@ fn display_usage(stream: File) !void {
     , .{});
 }
 
-fn display_help(stream: File) !void {
+fn displayHelp(stream: File) !void {
     var writer = stream.writer();
     try writer.print(
         \\chai - Chai programming language compiler

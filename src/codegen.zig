@@ -30,7 +30,7 @@ pub const CodeGenerator = struct {
         return val;
     }
 
-    pub fn generate_x86_64_intel_linux(self: *Self) !void {
+    pub fn generateX86_64IntelLinux(self: *Self) !void {
         var writer = self.out_file.writer();
 
         // Generate preamble
@@ -80,7 +80,7 @@ pub const CodeGenerator = struct {
         , .{});
 
         for (self.exprs) |e| {
-            try self.write_instruction_x86_64_intel_linux(e, writer);
+            try self.writeInstructionX86_64IntelLinux(e, writer);
         }
 
         // Generate post-amble
@@ -93,7 +93,7 @@ pub const CodeGenerator = struct {
         , .{});
     }
 
-    pub fn write_instruction_x86_64_intel_linux(self: *Self, e: Expr, writer: anytype) !void {
+    pub fn writeInstructionX86_64IntelLinux(self: *Self, e: Expr, writer: anytype) !void {
         try writer.print("    ;; {s}\n", .{e.kind});
 
         switch (e.kind) {
@@ -337,7 +337,7 @@ pub const CodeGenerator = struct {
                 , .{label_value});
 
                 for (stmt.main_body) |se| {
-                    try self.write_instruction_x86_64_intel_linux(se, writer);
+                    try self.writeInstructionX86_64IntelLinux(se, writer);
                 }
 
                 try writer.print(
@@ -348,7 +348,7 @@ pub const CodeGenerator = struct {
 
                 if (stmt.else_body) |else_body| {
                     for (else_body) |se| {
-                        try self.write_instruction_x86_64_intel_linux(se, writer);
+                        try self.writeInstructionX86_64IntelLinux(se, writer);
                     }
                 }
 
