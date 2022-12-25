@@ -40,6 +40,7 @@ pub const TokenKindTag = enum {
 
     If,
     Else,
+    While,
 };
 
 pub const TokenKind = union(TokenKindTag) {
@@ -81,6 +82,7 @@ pub const TokenKind = union(TokenKindTag) {
 
     If,
     Else,
+    While,
 
     pub fn getHumanName(self: Self) []const u8 {
         const tag: TokenKindTag = self;
@@ -123,6 +125,7 @@ pub const TokenKind = union(TokenKindTag) {
 
             .If => "if",
             .Else => "else",
+            .While => "while",
         };
     }
 };

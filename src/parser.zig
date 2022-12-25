@@ -88,11 +88,19 @@ pub const Parser = struct {
         return Expr{ .kind = ExprKind{ .If = .{ .main_body = body, .else_body = else_body } }, .src_loc = tok.src_loc };
     }
 
+    fn collectWhile(self: *Self) !Expr {
+        const tok = try self.expect(.While);
+        const body = try self.collectBody();
+
+        return Expr{ .kind = ExprKind{ .While = body }, .src_loc = tok.src_loc };
+    }
+
     fn collectExpr(self: *Self) !Expr {
         return switch (self.peek().kind) {
             // zig fmt really loves screwing this one up
             .BooleanLiteral, .CharacterLiteral, .IntegerLiteral, .FloatLiteral, .StringLiteral, .Plus, .Minus, .Star, .Slash, .Perc, .Neg, .Equal, .Less, .LessEqual, .Greater, .GreaterEqual, .Not, .And, .Or, .Drop, .Dup, .Over, .Swap, .Rot, .Print => return self.collectSimpleExpr(),
             .If => self.collectIf(),
+            .While => self.collectWhile(),
 
             .Identifier, .LeftBrace, .RightBrace, .Else => {
                 std.log.err("{}: Cannot parse expression from token '{s}'", .{ self.peek().src_loc, self.peek().kind.getHumanName() });

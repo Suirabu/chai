@@ -226,6 +226,7 @@ pub const TypeChecker = struct {
 
                 // Ensure that all possible paths affect the stack in the same way for type safety reasons
                 var state = try self.type_stack.clone();
+                defer state.deinit();
 
                 for (stmt.main_body) |se| {
                     try self.checkExpr(se);
@@ -249,6 +250,26 @@ pub const TypeChecker = struct {
                         return error.UnequalSignatures;
                     }
                 }
+            },
+            .While => |body| {
+                try self.expectMinimumElements(e, 1);
+
+                var state = try self.type_stack.clone();
+                defer state.deinit();
+
+                _ = try self.expectType(e, .{.Bool});
+
+                for (body) |se| {
+                    try self.checkExpr(se);
+                }
+
+                // Ensure while loop does not modify the type stack on completion
+                if (!mem.eql(ValueTag, self.type_stack.items, state.items)) {
+                    std.log.err("{}: While expression modifies stack on completion", .{e.src_loc});
+                    return error.ModifiedTypeStack; // Weird error name
+                }
+
+                _ = self.type_stack.pop(); // Conditional will always be popped of the stack
             },
         }
     }

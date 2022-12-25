@@ -357,6 +357,27 @@ pub const CodeGenerator = struct {
                     \\
                 , .{label_value});
             },
+            .While => |body| {
+                const label_value = self.incrementCounter();
+
+                try writer.print(
+                    \\.while_{d}_begin:
+                    \\    pop rax
+                    \\    cmp rax, 0
+                    \\    je .while_{d}_end
+                    \\
+                , .{ label_value, label_value });
+
+                for (body) |se| {
+                    try self.writeInstructionX86_64IntelLinux(se, writer);
+                }
+
+                try writer.print(
+                    \\    jmp .while_{d}_begin
+                    \\.while_{d}_end:
+                    \\
+                , .{ label_value, label_value });
+            },
         }
     }
 };

@@ -98,6 +98,7 @@ pub const ExprKindTag = enum {
     Print,
 
     If,
+    While,
 };
 
 pub const ExprKind = union(ExprKindTag) {
@@ -130,6 +131,7 @@ pub const ExprKind = union(ExprKindTag) {
     Print,
 
     If: struct { main_body: []Expr, else_body: ?[]Expr },
+    While: []Expr,
 
     pub fn getHumanName(self: Self) []const u8 {
         return switch (self) {
@@ -160,6 +162,7 @@ pub const ExprKind = union(ExprKindTag) {
             .Print => "print",
 
             .If => "if",
+            .While => "while",
         };
     }
 
@@ -229,6 +232,9 @@ pub const Expr = struct {
                 if (stmt.else_body) |else_body| {
                     allocator.free(else_body);
                 }
+            },
+            .While => |body| {
+                allocator.free(body);
             },
             else => {},
         }

@@ -77,6 +77,7 @@ pub const Lexer = struct {
 
         try map.put("if", .If);
         try map.put("else", .Else);
+        try map.put("while", .While);
 
         return map;
     }
