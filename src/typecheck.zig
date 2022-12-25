@@ -1,7 +1,6 @@
 const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
-const ValueTagArrayList = std.ArrayList(ValueTag);
 
 const expr = @import("expr.zig");
 const Expr = expr.Expr;
@@ -15,14 +14,14 @@ pub const TypeChecker = struct {
 
     exprs: []Expr,
     cursor: usize,
-    type_stack: ValueTagArrayList,
+    type_stack: std.ArrayList(ValueTag),
     allocator: Allocator,
 
     pub fn init(exprs: []Expr, allocator: Allocator) Self {
         return Self{
             .exprs = exprs,
             .cursor = 0,
-            .type_stack = ValueTagArrayList.init(allocator),
+            .type_stack = std.ArrayList(ValueTag).init(allocator),
             .allocator = allocator,
         };
     }
@@ -234,6 +233,7 @@ pub const TypeChecker = struct {
 
                 // Get assumed type signature
                 var type_signature = try self.type_stack.clone();
+                defer type_signature.deinit();
 
                 if (stmt.else_body) |else_body| {
                     // Reset type stack to test alternate paths
