@@ -1,5 +1,6 @@
 const std = @import("std");
 const fmt = std.fmt;
+const Allocator = std.mem.Allocator;
 
 const token = @import("token.zig");
 const TokenKind = token.TokenKind;
@@ -219,5 +220,17 @@ pub const Expr = struct {
         _ = opts;
 
         try fmt.format(writer, "expr: {}: {}", .{ self.src_loc, self.kind });
+    }
+
+    pub fn deinit(self: *Self, allocator: Allocator) void {
+        switch (self.kind) {
+            .If => |stmt| {
+                allocator.free(stmt.main_body);
+                if (stmt.else_body) |else_body| {
+                    allocator.free(else_body);
+                }
+            },
+            else => {},
+        }
     }
 };

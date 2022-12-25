@@ -66,16 +66,13 @@ pub const Parser = struct {
     fn collectBody(self: *Self) ![]Expr {
         _ = try self.expect(.LeftBrace);
 
-        // TODO: Figure out if this is leaking memory or not
-        // These cannot be deallocated before the codegen phase as this invokes
-        // undefined behavior
         var exprs = std.ArrayList(Expr).init(self.allocator);
         while (!self.reachedEnd() and self.peek().kind != .RightBrace) {
             try exprs.append(try self.collectExpr());
         }
 
         _ = try self.expect(.RightBrace);
-        return exprs.items;
+        return exprs.toOwnedSlice();
     }
 
     fn collectIf(self: *Self) !Expr {
@@ -120,7 +117,7 @@ pub const Parser = struct {
         if (has_error) {
             return error.ParserError;
         } else {
-            return exprs.items;
+            return exprs.toOwnedSlice();
         }
     }
 };

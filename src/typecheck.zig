@@ -72,6 +72,8 @@ pub const TypeChecker = struct {
             std.log.err("Expected 0 elements left remaining on stack before exiting, found {d}", .{self.type_stack.items.len});
             return error.RemainingElements;
         }
+
+        self.type_stack.deinit();
     }
 
     // TODO: Reduce code repitition

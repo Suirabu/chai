@@ -38,6 +38,10 @@ pub const Lexer = struct {
         };
     }
 
+    pub fn deinit(self: *Self) void {
+        self.keywords.deinit();
+    }
+
     fn getKeywordsHashMap(allocator: Allocator) !KeywordsHashMap {
         var map = KeywordsHashMap.init(allocator);
 
@@ -289,7 +293,7 @@ pub const Lexer = struct {
         if (has_error) {
             return error.LexerError;
         } else {
-            return tokens.items;
+            return tokens.toOwnedSlice();
         }
     }
 };
